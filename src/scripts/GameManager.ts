@@ -26,6 +26,11 @@ export default class GameManager implements IScript {
 
     public setPhase(newPhase: string) {
         this.phase = newPhase;
+        if (newPhase === "IDLE") {
+            try { if ((window as any).resetBall) (window as any).resetBall(); } catch(e) { alert("resetBall error: " + e); }
+            try { if ((window as any).resetGoalkeeper) (window as any).resetGoalkeeper(); } catch(e) { alert("resetGoalkeeper error: " + e); }
+            try { if ((window as any).resetTrail) (window as any).resetTrail(); } catch(e) { alert("resetTrail error: " + e); }
+        }
         this.notifyState();
     }
 
@@ -36,6 +41,14 @@ export default class GameManager implements IScript {
             
             if (outcome === "GOAL!") {
                 this.score++;
+                if ((window as any).triggerCrowdJump) {
+                    (window as any).triggerCrowdJump();
+                }
+                if (this.level === 3 && this.shots.filter(s => s === "GOAL!").length === 3) {
+                    if ((window as any).triggerConfetti) {
+                        (window as any).triggerConfetti();
+                    }
+                }
             }
         }
         this.notifyState();
@@ -50,29 +63,43 @@ export default class GameManager implements IScript {
             
             if (goalsThisRound >= 3) {
                 if (this.level < 3) {
-                    this.level++;
+                    this.setPhase("LEVEL_COMPLETE");
                 } else {
                     // Finished level 3, game over!
                     this.setPhase("ENDGAME");
-                    return; // Stop round reset
                 }
             } else {
                 // Failed to score 3 goals!
                 this.score -= goalsThisRound; // Remove the goals they scored this round
                 if ((window as any).setOutcomeText) {
-                    (window as any).setOutcomeText("TRY AGAIN!");
+                    (window as any).setOutcomeText(null);
                 }
-                // Don't advance level, just reset the board
+                this.setPhase("LEVEL_FAILED");
             }
-            
-            // Clear board for next level
-            this.shots = [null, null, null, null, null];
-            this.currentShotIndex = 0;
-            this.setPhase("IDLE");
         } else {
             // Not end of round yet, just move to next shot
             this.setPhase("IDLE");
         }
+    }
+
+    public advanceLevel() {
+        if (this.level < 3) {
+            this.level++;
+        }
+        this.shots = [null, null, null, null, null];
+        this.currentShotIndex = 0;
+        this.setPhase("IDLE");
+        if ((window as any).updateLawn) (window as any).updateLawn();
+        if ((window as any).updateGkScale) (window as any).updateGkScale();
+        if ((window as any).updateCrowd) (window as any).updateCrowd();
+        if ((window as any).updateClouds) (window as any).updateClouds();
+    }
+
+    public retryLevel() {
+        // Score was already decremented in resetRound, just reset board
+        this.shots = [null, null, null, null, null];
+        this.currentShotIndex = 0;
+        this.setPhase("IDLE");
     }
 
     public resetGame() {
@@ -81,6 +108,10 @@ export default class GameManager implements IScript {
         this.shots = [null, null, null, null, null];
         this.currentShotIndex = 0;
         this.setPhase("IDLE");
+        if ((window as any).updateLawn) (window as any).updateLawn();
+        if ((window as any).updateGkScale) (window as any).updateGkScale();
+        if ((window as any).updateCrowd) (window as any).updateCrowd();
+        if ((window as any).updateClouds) (window as any).updateClouds();
     }
 
     private notifyState() {

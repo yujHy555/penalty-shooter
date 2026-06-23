@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useRef } from "react";
 
-export type KickPhase = "IDLE" | "DIRECTION" | "POWER" | "HEIGHT" | "CURVE" | "KICKED" | "ENDGAME";
+export type KickPhase = "MENU" | "IDLE" | "DIRECTION" | "POWER" | "HEIGHT" | "CURVE" | "KICKED" | "ENDGAME" | "LEVEL_COMPLETE" | "LEVEL_FAILED";
 
 export interface KickParams {
   direction: number; // -1 to 1 (left to right)
@@ -19,27 +19,56 @@ interface GameUIProps {
   level: number;
   score: number;
   shots?: (string | null)[];
+  isLoading?: boolean;
+  onAdvanceLevel?: () => void;
+  onRetryLevel?: () => void;
 }
 
-export function GameUI({ onKickParamsUpdate, onKickExecute, phase, setPhase, level, score, shots = [null, null, null, null, null] }: GameUIProps) {
+export function GameUI({ onKickParamsUpdate, onKickExecute, phase, setPhase, level, score, shots = [null, null, null, null, null], isLoading = false, onAdvanceLevel, onRetryLevel }: GameUIProps) {
   const [direction, setDirection] = useState(0);
   const [power, setPower] = useState(0);
   const [height, setHeight] = useState(0);
   const [curve, setCurve] = useState(0);
   const [outcomeText, setOutcomeText] = useState<string | null>(null);
-  const [uiConfig, setUiConfig] = useState({
+  const [uiConfig, setUiConfig] = useState<Record<string, any>>({
     levelScale: 1.0, levelOpacity: 1.0, levelTop: 16, levelLeft: 16,
     scoreScale: 1.0, scoreOpacity: 1.0, scoreTop: 16, scoreRight: 16,
     sbScale: 1.0, sbOpacity: 1.0, sbTop: 80, sbLeft: 16,
-    centerScale: 0.5, centerOpacity: 1.0, centerTop: 269,
-    outcomeScale: 1.0, outcomeOpacity: 1.0, outcomeTop: 64,
-    dirScale: 1.0, dirOpacity: 1.0, dirBottom: 339,
-    pwrScale: 1.0, pwrOpacity: 1.0, pwrBottom: 239,
-    hgtScale: 1.0, hgtOpacity: 1.0, hgtBottom: 139,
-    crvScale: 1.0, crvOpacity: 1.0, crvBottom: 39,
+    centerScale: 0.5, centerOpacity: 1.0, centerTop: 208,
+    outcomeScale: 1.7, outcomeOpacity: 1.0, outcomeTop: 120,
+    dirScale: 1.0, dirOpacity: 1.0, dirBottom: 303,
+    gaugeScale: 1.3, gaugeX: 0,
+    pwrScale: 1.0, pwrX: 0, pwrY: 0,
+    hgtScale: 1.0, hgtX: 0, hgtY: 0,
+    crvScale: 1.0, crvX: 0, crvY: 24,
+    dirSpeed: 2.6,
+    pwrSpeed: 5.5,
+    hgtSpeed: 5.5,
+    crvSpeed: 5.5,
+    preloaderSpinnerScale: 1.0, preloaderSpinnerTop: 0,
+    preloaderTitleScale: 1.0, preloaderTitleTop: 0,
+    preloaderSubScale: 1.0, preloaderSubTop: 0,
   });
 
+  const [uiScale, setUiScale] = useState(1.0);
+  const [scaleX, setScaleX] = useState(1.0);
+  const [scaleY, setScaleY] = useState(1.0);
+  const [sceneScale, setSceneScale] = useState(1.0);
+  const [windowSize, setWindowSize] = useState({ w: 1920, h: 1080 });
+
   useEffect(() => {
+    const handleResize = () => {
+      const sx = window.innerWidth / 1920;
+      const sy = window.innerHeight / 1080;
+      setScaleX(sx);
+      setScaleY(sy);
+      setUiScale(Math.min(sx, sy));
+      setSceneScale(Math.min(window.innerWidth, window.innerHeight) / 1080);
+      setWindowSize({ w: window.innerWidth, h: window.innerHeight });
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+
     (window as any).setOutcomeText = setOutcomeText;
     
     // Poll the global UI settings from lil-gui
@@ -61,7 +90,10 @@ export function GameUI({ onKickParamsUpdate, onKickExecute, phase, setPhase, lev
         });
       }
     }, 100);
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('resize', handleResize);
+    };
   }, []);
 
   const directionRef = useRef(0);
@@ -113,22 +145,32 @@ export function GameUI({ onKickParamsUpdate, onKickExecute, phase, setPhase, lev
       }
       
       if (phaseRef.current === "DIRECTION") {
-        const val = pingPong01(time * 2 + 0.5) * 2 - 1;
+        let currentDirSpeed = uiConfig.dirSpeed || 2.6;
+        if (level === 1 && uiConfig.dirSpeedLvl1 !== undefined) currentDirSpeed = uiConfig.dirSpeedLvl1;
+        if (level === 2 && uiConfig.dirSpeedLvl2 !== undefined) currentDirSpeed = uiConfig.dirSpeedLvl2;
+        if (level === 3 && uiConfig.dirSpeedLvl3 !== undefined) currentDirSpeed = uiConfig.dirSpeedLvl3;
+        const val = pingPong01(time * currentDirSpeed + 0.5) * 2 - 1;
         setDirection(val);
         directionRef.current = val;
         onKickParamsUpdate({ direction: val });
       } else if (phaseRef.current === "POWER") {
-        const val = pingPong01(time * 3);
+        const val = pingPong01(time * uiConfig.pwrSpeed);
         setPower(val);
         powerRef.current = val;
         onKickParamsUpdate({ power: val });
       } else if (phaseRef.current === "HEIGHT") {
-        const val = pingPong01(time * 3.5);
+        let speedMult = 1.0;
+        const pwr = powerRef.current;
+        if (level === 1) speedMult = 1.0 + (pwr * (uiConfig.hgtPwrMultLvl1 || 0.0));
+        else if (level === 2) speedMult = 1.0 + (pwr * (uiConfig.hgtPwrMultLvl2 || 0.5));
+        else if (level === 3) speedMult = 1.0 + (pwr * (uiConfig.hgtPwrMultLvl3 || 1.0));
+
+        const val = pingPong01(time * (uiConfig.hgtSpeed * speedMult));
         setHeight(val);
         heightRef.current = val;
         onKickParamsUpdate({ height: val });
       } else if (phaseRef.current === "CURVE") {
-        const val = pingPong01(time * 4 + 0.5) * 2 - 1;
+        const val = pingPong01(time * uiConfig.crvSpeed + 0.5) * 2 - 1;
         setCurve(val);
         curveRef.current = val;
         onKickParamsUpdate({ curve: val });
@@ -143,7 +185,7 @@ export function GameUI({ onKickParamsUpdate, onKickExecute, phase, setPhase, lev
   }, [phase, onKickParamsUpdate]);
 
   const handleScreenClick = () => {
-    if (phase === "ENDGAME") return;
+    if (phase === "ENDGAME" || phase === "MENU") return;
 
     switch (phase) {
       case "IDLE":
@@ -153,6 +195,12 @@ export function GameUI({ onKickParamsUpdate, onKickExecute, phase, setPhase, lev
         break;
       case "DIRECTION":
         phaseRef.current = "POWER";
+        (window as any).arrowJiggleStart = performance.now();
+        let currentDirSpeed = uiConfig.dirSpeed || 2.6;
+        if (level === 1 && uiConfig.dirSpeedLvl1 !== undefined) currentDirSpeed = uiConfig.dirSpeedLvl1;
+        if (level === 2 && uiConfig.dirSpeedLvl2 !== undefined) currentDirSpeed = uiConfig.dirSpeedLvl2;
+        if (level === 3 && uiConfig.dirSpeedLvl3 !== undefined) currentDirSpeed = uiConfig.dirSpeedLvl3;
+        (window as any).arrowJiggleSpeedFactor = currentDirSpeed;
         setPhase("POWER");
         break;
       case "POWER":
@@ -188,26 +236,77 @@ export function GameUI({ onKickParamsUpdate, onKickExecute, phase, setPhase, lev
     }
   };
 
+  const cx = 100, cy = 100, r = 65;
+  const powerBlocksCount = Math.ceil(power * 10);
+  const heightBlocksCount = Math.ceil(height * 10);
+  
+  const powerArcs = Array.from({ length: 10 }).map((_, i) => {
+    const startAngle = 105 + i * 15;
+    const endAngle = startAngle + 12;
+    const startRad = (startAngle * Math.PI) / 180;
+    const endRad = (endAngle * Math.PI) / 180;
+    const x1 = (cx + r * Math.cos(startRad)).toFixed(3);
+    const y1 = (cy + r * Math.sin(startRad)).toFixed(3);
+    const x2 = (cx + r * Math.cos(endRad)).toFixed(3);
+    const y2 = (cy + r * Math.sin(endRad)).toFixed(3);
+    return { path: `M ${x1},${y1} A ${r},${r} 0 0,1 ${x2},${y2}`, active: i < powerBlocksCount };
+  });
+
+  const heightArcs = Array.from({ length: 10 }).map((_, i) => {
+    const startAngle = 75 - i * 15;
+    const endAngle = startAngle - 12;
+    const startRad = (startAngle * Math.PI) / 180;
+    const endRad = (endAngle * Math.PI) / 180;
+    const x1 = (cx + r * Math.cos(startRad)).toFixed(3);
+    const y1 = (cy + r * Math.sin(startRad)).toFixed(3);
+    const x2 = (cx + r * Math.cos(endRad)).toFixed(3);
+    const y2 = (cy + r * Math.sin(endRad)).toFixed(3);
+    return { path: `M ${x1},${y1} A ${r},${r} 0 0,0 ${x2},${y2}`, active: i < heightBlocksCount };
+  });
+
   return (
-    <div 
-      className="absolute inset-0 z-10 select-none cursor-pointer flex flex-col justify-between p-4"
-      onClick={handleScreenClick}
-    >
-      <div className="flex flex-col h-full w-full justify-between">
-        {/* HUD Header */}
-        <div className="flex justify-between items-start pt-4 px-4 pointer-events-none">
-          <div className="absolute bg-black/50 text-white px-4 py-2 rounded-xl font-bold text-xl uppercase tracking-widest backdrop-blur-md shadow-lg border border-white/10"
-               style={{ opacity: uiConfig.levelOpacity, transform: `scale(${uiConfig.levelScale})`, transformOrigin: 'top left', top: `${uiConfig.levelTop}px`, left: `${uiConfig.levelLeft}px`, transition: 'all 0.2s' }}>
-            Level {level}
+    <>
+      {isLoading && (
+        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black backdrop-blur-xl overflow-hidden px-4">
+          <div className="relative flex items-center justify-center w-24 h-24 md:w-32 md:h-32 mb-4 md:mb-8 shrink-0 transition-transform"
+               style={{ transform: `translateY(${uiConfig.preloaderSpinnerTop || 0}px) scale(${uiConfig.preloaderSpinnerScale || 1})` }}>
+            {/* Outer spinning glow */}
+            <div className="absolute inset-0 rounded-full border-4 border-t-blue-500 border-r-purple-500 border-b-transparent border-l-transparent animate-spin shadow-[0_0_30px_rgba(59,130,246,0.8)]"></div>
+            {/* Inner pulse */}
+            <div className="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-tr from-blue-500 to-purple-500 rounded-full animate-pulse shadow-[0_0_40px_rgba(168,85,247,0.8)]"></div>
           </div>
-          <div className="absolute bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-2 rounded-xl font-bold text-2xl shadow-lg shadow-blue-500/20 border border-white/20"
-               style={{ opacity: uiConfig.scoreOpacity, transform: `scale(${uiConfig.scoreScale})`, transformOrigin: 'top right', top: `${uiConfig.scoreTop}px`, right: `${uiConfig.scoreRight}px`, transition: 'all 0.2s' }}>
-            Score: {score}
+          <h1 className="py-2 leading-relaxed text-2xl md:text-4xl text-center font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 drop-shadow-[0_0_15px_rgba(168,85,247,0.5)] animate-pulse tracking-widest shrink-0 transition-transform"
+              style={{ transform: `translateY(${uiConfig.preloaderTitleTop || 0}px) scale(${uiConfig.preloaderTitleScale || 1})` }}>
+            LOADING ASSETS...
+          </h1>
+          <p className="text-sm md:text-base text-gray-400 mt-2 md:mt-4 font-bold tracking-wider animate-pulse text-center shrink-0 transition-transform"
+             style={{ transform: `translateY(${uiConfig.preloaderSubTop || 0}px) scale(${uiConfig.preloaderSubScale || 1})` }}>
+            PREPARING STADIUM
+          </p>
+        </div>
+      )}
+      
+      {phase !== "MENU" && (
+        <>
+          <div 
+            className={`absolute inset-0 z-10 select-none cursor-pointer flex flex-col justify-between transition-opacity duration-1000 ${isLoading ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+            onPointerDown={handleScreenClick}
+          >
+      <div className="flex flex-col h-full w-full justify-between">
+        
+        {/* Level Badge */}
+        <div className="absolute pointer-events-none" 
+             style={{ opacity: uiConfig.levelOpacity, transform: `scale(${uiConfig.levelScale * sceneScale})`, transformOrigin: 'top left', top: `${uiConfig.levelTop * sceneScale}px`, left: `${uiConfig.levelLeft * sceneScale}px`, transition: 'all 0.2s' }}>
+          <div className="bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl p-1 shadow-lg shadow-orange-500/30">
+            <div className="bg-black text-white px-4 py-2 rounded-xl font-bold text-xl uppercase tracking-widest border border-white/10">
+              Level {level}
+            </div>
           </div>
         </div>
-
-        {/* Scoreboard */}
-        <div className="absolute pointer-events-none flex items-center space-x-4 bg-black/50 p-3 rounded-2xl border border-white/10 backdrop-blur-sm" style={{ opacity: uiConfig.sbOpacity, transform: `scale(${uiConfig.sbScale})`, transformOrigin: 'top left', top: `${uiConfig.sbTop}px`, left: `${uiConfig.sbLeft}px`, transition: 'all 0.2s' }}>
+        
+        {/* Scoreboard (Shots) */}
+        <div className="absolute pointer-events-none flex items-center space-x-2 bg-black/50 p-3 rounded-2xl border border-white/10 backdrop-blur-sm" 
+             style={{ opacity: uiConfig.sbOpacity, transform: `scale(${uiConfig.sbScale * sceneScale})`, transformOrigin: 'top left', top: `${uiConfig.sbTop * sceneScale}px`, left: `${uiConfig.sbLeft * sceneScale}px`, transition: 'all 0.2s' }}>
           <div className="flex space-x-2">
             {shots?.map((shot, idx) => (
               <div 
@@ -215,117 +314,229 @@ export function GameUI({ onKickParamsUpdate, onKickExecute, phase, setPhase, lev
                 className={`w-8 h-8 rounded-md flex items-center justify-center font-bold text-lg shadow-inner ${
                   shot === "GOAL!" ? "bg-green-500 text-white shadow-green-500/50" : 
                   (shot === "MISS!" || shot === "SAVE!") ? "bg-red-500 text-white shadow-red-500/50" : 
-                  "bg-white/10"
+                  "bg-white/10 text-white/40"
                 }`}
               >
                 {shot === "GOAL!" && "⚽"}
                 {(shot === "MISS!" || shot === "SAVE!") && "❌"}
+                {!shot && (idx + 1)}
               </div>
             ))}
           </div>
           <div className="text-white font-black text-xl">
-            {shots?.filter(s => s === "GOAL!").length} / 3
+            {shots?.filter(s => s === "GOAL!").length} / 5
           </div>
         </div>
 
-        {/* Center Instruction */}
-        <div className="flex justify-center pointer-events-none absolute w-full left-0" style={{ opacity: uiConfig.centerOpacity, transform: `scale(${uiConfig.centerScale})`, transformOrigin: 'center center', top: `${uiConfig.centerTop}px`, transition: 'all 0.2s' }}>
-          {phase === "IDLE" && (
-          <h1 className="text-4xl md:text-6xl text-white font-black drop-shadow-2xl animate-pulse">
-            TAP TO START
-          </h1>
-        )}
-        {phase !== "IDLE" && phase !== "KICKED" && phase !== "ENDGAME" && (
-          <h2 className="text-2xl text-white font-bold drop-shadow-lg bg-black/30 px-6 py-2 rounded-full backdrop-blur-sm">
-            TAP TO LOCK {phase}
-          </h2>
-        )}
-        </div>
-        {outcomeText && phase !== "ENDGAME" && (
-          <div className="absolute w-full left-0 pointer-events-none flex justify-center z-50"
-               style={{ opacity: uiConfig.outcomeOpacity, transform: `scale(${uiConfig.outcomeScale})`, transformOrigin: 'center center', top: `${uiConfig.outcomeTop}px`, transition: 'all 0.2s' }}>
-            <h1 className={`text-6xl md:text-8xl font-black drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)] ${outcomeText === "GOAL!" ? "text-green-400" : outcomeText === "SAVE!" ? "text-red-400" : "text-yellow-400"} animate-pop-fade`}>
-              {outcomeText}
+        {/* Center Instructions (Tap to start) */}
+        <div className="flex justify-center pointer-events-none absolute w-full left-0" style={{ top: `${windowSize.h / 2 - (540 - uiConfig.centerTop) * sceneScale}px`, opacity: uiConfig.centerOpacity, transition: 'all 0.2s' }}>
+          <div style={{ transform: `scale(${uiConfig.centerScale * sceneScale})`, transformOrigin: 'top center' }}>
+            {phase === "IDLE" && (
+            <h1 className="text-6xl text-white font-black drop-shadow-2xl animate-pulse whitespace-nowrap">
+              TAP TO START
             </h1>
+            )}
+            {phase !== "IDLE" && phase !== "KICKED" && phase !== "ENDGAME" && (
+            <h2 className="text-2xl text-white font-bold drop-shadow-lg bg-black/30 px-6 py-2 rounded-full backdrop-blur-sm whitespace-nowrap">
+              TAP TO LOCK {phase}
+            </h2>
+            )}
+          </div>
+        </div>
+        {outcomeText && (
+          <div className="flex justify-center pointer-events-none absolute w-full left-0"
+               style={{ top: `${windowSize.h / 2 - (540 - uiConfig.outcomeTop) * sceneScale}px`, opacity: uiConfig.outcomeOpacity, transition: 'all 0.2s' }}>
+            <div style={{ transform: `scale(${uiConfig.outcomeScale * sceneScale})`, transformOrigin: 'top center' }}>
+              <h1 className={`text-8xl font-black drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)] ${outcomeText === "GOAL!" ? "text-green-400" : outcomeText === "SAVE!" ? "text-red-400" : "text-yellow-400"} animate-pop-fade`}>
+                {outcomeText}
+              </h1>
+            </div>
           </div>
         )}
         {phase === "ENDGAME" && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-md z-50 pointer-events-auto">
-            <h1 className="text-6xl md:text-8xl font-black text-white drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)] mb-4">
-              {score >= 10 ? "YOU WIN!" : "GAME OVER"}
-            </h1>
-            <h2 className="text-3xl text-white font-bold mb-8">
-              Final Score: <span className="text-blue-400">{score}</span> / 15
-            </h2>
-            <button 
-              className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full text-white font-black text-2xl shadow-[0_0_20px_rgba(34,197,94,0.5)] hover:scale-105 active:scale-95 transition-all"
-              onClick={(e) => {
-                e.stopPropagation();
-                if ((window as any).gameManager) {
-                  (window as any).gameManager.resetGame();
-                }
-              }}
-            >
-              PLAY AGAIN
-            </button>
+          <div className="absolute inset-0 flex flex-col items-center justify-center backdrop-blur-md z-50 pointer-events-auto" style={{ backgroundColor: `rgba(0,0,0,${uiConfig.endBgOpacity ?? 0.8})` }}>
+            <div className="flex flex-col items-center justify-center w-full" style={{ transform: `scale(${sceneScale})` }}>
+              <div style={{ transform: `scale(${uiConfig.endTitleScale ?? 1.0}) translateY(${uiConfig.endTitleY ?? 0}px)` }}>
+                <h1 className="text-8xl font-black drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)] mb-4 animate-in zoom-in fade-in duration-500 whitespace-nowrap"
+                    style={{ color: uiConfig.endTitleColor }}>
+                  {score >= 9 ? "YOU WIN!" : "GAME OVER"}
+                </h1>
+              </div>
+              <div style={{ transform: `scale(${uiConfig.endSubScale ?? 1.0}) translateY(${uiConfig.endSubY ?? 0}px)` }}>
+                <h2 className="text-3xl font-bold mb-8 animate-in slide-in-from-bottom-5 fade-in duration-500 delay-150 fill-mode-both whitespace-nowrap"
+                    style={{ color: uiConfig.endSubColor }}>
+                  Final Score: <span className="text-blue-400">{score}</span> / 15
+                </h2>
+              </div>
+              <div style={{ transform: `scale(${uiConfig.endBtnScale ?? 1.0}) translateY(${uiConfig.endBtnY ?? 0}px)` }}>
+                <button 
+                  className="px-8 py-4 rounded-full font-black text-2xl shadow-[0_0_20px_rgba(34,197,94,0.5)] hover:scale-105 active:scale-95 transition-all animate-in slide-in-from-bottom-10 fade-in duration-500 delay-300 fill-mode-both whitespace-nowrap"
+                  style={{ backgroundColor: uiConfig.endBtnBgColor, color: uiConfig.endBtnColor, backgroundImage: 'none' }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if ((window as any).gameManager) {
+                      (window as any).gameManager.resetGame();
+                    }
+                  }}
+                >
+                  PLAY AGAIN
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        {phase === "LEVEL_COMPLETE" && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center backdrop-blur-md z-50 pointer-events-auto" style={{ backgroundColor: `rgba(0,0,0,${uiConfig.compBgOpacity ?? 0.6})` }}>
+            <div className="flex flex-col items-center justify-center w-full" style={{ transform: `scale(${sceneScale})` }}>
+              <div style={{ transform: `scale(${uiConfig.compTitleScale ?? 1.0}) translateY(${uiConfig.compTitleY ?? 0}px)` }}>
+                <h1 className="text-7xl font-black drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)] mb-2 animate-in slide-in-from-bottom-10 fade-in duration-500 py-2 leading-relaxed whitespace-nowrap"
+                    style={{ color: uiConfig.compTitleColor, WebkitTextFillColor: uiConfig.compTitleColor, backgroundImage: 'none' }}>
+                  CONGRATS
+                </h1>
+              </div>
+              <div style={{ transform: `scale(${uiConfig.compSubScale ?? 1.0}) translateY(${uiConfig.compSubY ?? 0}px)` }}>
+                <h2 className="text-4xl font-bold mb-8 animate-in slide-in-from-bottom-10 fade-in duration-500 delay-100 fill-mode-both whitespace-nowrap"
+                    style={{ color: uiConfig.compSubColor }}>
+                  STAGE COMPLETE
+                </h2>
+              </div>
+              <div className="flex space-x-4 mb-12" style={{ transform: `scale(${uiConfig.compIconScale ?? 1.0}) translateY(${uiConfig.compIconY ?? 0}px)` }}>
+                {[0,1,2,3,4].map((i) => {
+                   const goals = shots.filter(s => s === "GOAL!").length;
+                   const isGold = i < goals;
+                   return (
+                     <div key={i} 
+                          className={`animate-in fade-in duration-700 ${isGold ? "zoom-in spin-in-12" : "zoom-in-90"}`}
+                          style={{ 
+                            animationDelay: `${300 + i * 150}ms`,
+                            animationFillMode: "both",
+                            animationTimingFunction: isGold ? "cubic-bezier(0.175, 0.885, 0.32, 1.275)" : "ease-out"
+                          }}>
+                       <svg className={`w-24 h-24 ${isGold ? "drop-shadow-[0_0_15px_rgba(250,204,21,0.6)]" : "drop-shadow-[0_0_5px_rgba(0,0,0,0.5)] text-gray-600/50"}`} 
+                            style={isGold ? { color: uiConfig.compIconColor } : {}}
+                            viewBox="0 0 24 24" fill="currentColor">
+                         <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                       </svg>
+                     </div>
+                   );
+                })}
+              </div>
+              <div style={{ transform: `scale(${uiConfig.compBtnScale ?? 1.0}) translateY(${uiConfig.compBtnY ?? 0}px)` }}>
+                <button 
+                  className="px-8 py-4 rounded-full font-black text-2xl shadow-[0_0_20px_rgba(250,204,21,0.4)] hover:scale-105 active:scale-95 transition-all animate-in slide-in-from-bottom-10 fade-in duration-500 delay-500 fill-mode-both whitespace-nowrap"
+                  style={{ backgroundColor: uiConfig.compBtnBgColor, color: uiConfig.compBtnColor, backgroundImage: 'none', animationFillMode: "both" }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (onAdvanceLevel) onAdvanceLevel();
+                  }}
+                >
+                  CONTINUE
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        {phase === "LEVEL_FAILED" && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center backdrop-blur-md z-50 pointer-events-auto" style={{ backgroundColor: `rgba(0,0,0,${uiConfig.failBgOpacity ?? 0.8})` }}>
+            <div className="flex flex-col items-center justify-center w-full" style={{ transform: `scale(${sceneScale})` }}>
+              <div style={{ transform: `scale(${uiConfig.failTitleScale ?? 1.0}) translateY(${uiConfig.failTitleY ?? 0}px)` }}>
+                <h1 className="text-7xl font-black drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)] mb-2 animate-in zoom-in fade-in duration-500 py-2 leading-relaxed whitespace-nowrap"
+                    style={{ color: uiConfig.failTitleColor, WebkitTextFillColor: uiConfig.failTitleColor, backgroundImage: 'none' }}>
+                  UNLUCKY
+                </h1>
+              </div>
+              <div style={{ transform: `scale(${uiConfig.failSubScale ?? 1.0}) translateY(${uiConfig.failSubY ?? 0}px)` }}>
+                <h2 className="text-4xl font-bold mb-12 animate-in zoom-in fade-in duration-500 delay-100 whitespace-nowrap" 
+                    style={{ animationFillMode: "both", color: uiConfig.failSubColor }}>
+                  BETTER LUCK NEXT TIME
+                </h2>
+              </div>
+              <div style={{ transform: `scale(${uiConfig.failBtnScale ?? 1.0}) translateY(${uiConfig.failBtnY ?? 0}px)` }}>
+                <button 
+                  className="px-8 py-4 rounded-full font-black text-2xl shadow-[0_0_20px_rgba(34,197,94,0.5)] hover:scale-105 active:scale-95 transition-all animate-in slide-in-from-bottom-10 fade-in duration-500 delay-300 whitespace-nowrap"
+                  style={{ backgroundColor: uiConfig.failBtnBgColor, color: uiConfig.failBtnColor, backgroundImage: 'none', animationFillMode: "both" }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (onRetryLevel) onRetryLevel();
+                  }}
+                >
+                  TRY AGAIN
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>
 
       {/* Gauges Area */}
-      <div className={`absolute w-full pointer-events-none ${phase === "ENDGAME" ? "hidden" : ""}`}>
-        {/* Direction Gauge (Arrow visualization) */}
-        <div className={`absolute left-1/2 -translate-x-1/2 w-full max-w-md bg-black/40 backdrop-blur-md p-4 rounded-2xl border border-white/10 shadow-2xl h-20 flex items-center justify-center transition-all duration-300 ${(phase === "IDLE" || phase === "DIRECTION") ? "scale-105 pointer-events-auto" : "scale-95 pointer-events-none"}`}
-             style={{ opacity: (phase === "IDLE" || phase === "DIRECTION") ? uiConfig.dirOpacity : 0, transform: `translateX(-50%) scale(${uiConfig.dirScale})`, transformOrigin: 'bottom center', bottom: `${uiConfig.dirBottom}px`, transition: 'all 0.2s' }}>
-          <div className="w-full h-2 bg-white/20 rounded-full relative overflow-hidden">
-            <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-white/50 -translate-x-1/2"></div>
-            <div 
-              className="absolute top-1/2 -translate-y-1/2 -ml-2 w-4 h-4 rounded-full bg-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.8)]"
-              style={{ left: `${((direction + 1) / 2) * 100}%`, transition: phase !== "DIRECTION" ? "none" : "none" }}
-            />
-          </div>
-          <span className="absolute -top-4 text-white text-xs font-bold tracking-widest text-white/70">DIRECTION</span>
-        </div>
+      {/* Retro Gauges Area */}
+      <div className={`absolute pointer-events-none transition-all duration-300 ${["ENDGAME", "LEVEL_COMPLETE", "LEVEL_FAILED", "IDLE", "KICKED"].includes(phase) ? "opacity-0 scale-90" : "opacity-100 scale-100"}`}
+           style={{ 
+             bottom: `${windowSize.h / 2 - (540 - uiConfig.dirBottom) * sceneScale}px`, 
+             left: `${windowSize.w / 2 + uiConfig.gaugeX * sceneScale}px`, 
+             transform: `translateX(-50%) scale(${uiConfig.gaugeScale * sceneScale})`, 
+             transformOrigin: 'bottom center' 
+           }}>
+        
+        <svg width="312" height="312" viewBox="0 0 200 200" className="drop-shadow-[0_0_10px_rgba(0,0,0,0.6)]">
+          <defs>
+            {/* The signature retro gradient from the image: Green -> Orange -> Red */}
+            <linearGradient id="gaugeGradient" x1="0" y1="163" x2="0" y2="37" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor="#22c55e" />   {/* Green */}
+              <stop offset="40%" stopColor="#facc15" />  {/* Yellow/Orange */}
+              <stop offset="70%" stopColor="#ef4444" />  {/* Red */}
+            </linearGradient>
+          </defs>
 
-        {/* Power Gauge */}
-        <div className={`absolute left-1/2 -translate-x-1/2 w-full max-w-md bg-black/40 backdrop-blur-md p-4 rounded-2xl border border-white/10 shadow-2xl h-20 flex items-center transition-all duration-300 ${phase === "POWER" ? "scale-105 pointer-events-auto" : "scale-95 pointer-events-none"}`}
-             style={{ opacity: phase === "POWER" ? uiConfig.pwrOpacity : 0, transform: `translateX(-50%) scale(${uiConfig.pwrScale})`, transformOrigin: 'bottom center', bottom: `${uiConfig.pwrBottom}px`, transition: 'all 0.2s' }}>
-          <span className="absolute -top-4 text-white text-xs font-bold tracking-widest text-white/70">POWER</span>
-          <div className="w-full h-4 bg-white/20 rounded-full overflow-hidden border border-white/10 shadow-inner">
-            <div 
-              className="h-full bg-gradient-to-r from-green-500 via-yellow-500 to-red-500"
-              style={{ width: `${power * 100}%` }}
-            />
-          </div>
-        </div>
+          {/* ALL GAUGES are permanently visible during setup to act as a unified HUD */}
+          <g style={{ opacity: 1.0, transition: 'opacity 0.2s' }}>
+            
+            {/* POWER GAUGE (Left Arc) */}
+            <g style={{ transform: `translate(${uiConfig.pwrX}px, ${uiConfig.pwrY}px) scale(${uiConfig.pwrScale})`, transformOrigin: '100px 100px', transition: 'transform 0.1s' }}>
+              {powerArcs.map((arc, i) => (
+                <path key={`pbg-${i}`} d={arc.path} fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="14" strokeLinecap="butt" />
+              ))}
+              {powerArcs.map((arc, i) => arc.active && (
+                <path key={`pfg-${i}`} d={arc.path} fill="none" stroke="url(#gaugeGradient)" strokeWidth="14" strokeLinecap="butt" />
+              ))}
+            </g>
 
-        {/* Height Gauge */}
-        <div className={`absolute left-1/2 -translate-x-1/2 w-full max-w-md bg-black/40 backdrop-blur-md p-4 rounded-2xl border border-white/10 shadow-2xl h-20 flex items-center transition-all duration-300 ${phase === "HEIGHT" ? "scale-105 pointer-events-auto" : "scale-95 pointer-events-none"}`}
-             style={{ opacity: phase === "HEIGHT" ? uiConfig.hgtOpacity : 0, transform: `translateX(-50%) scale(${uiConfig.hgtScale})`, transformOrigin: 'bottom center', bottom: `${uiConfig.hgtBottom}px`, transition: 'all 0.2s' }}>
-          <span className="absolute -top-4 text-white text-xs font-bold tracking-widest text-white/70">HEIGHT</span>
-          <div className="w-full h-4 bg-white/20 rounded-full overflow-hidden border border-white/10 shadow-inner">
-            <div 
-              className="h-full bg-gradient-to-t from-blue-400 to-indigo-600 rounded-full"
-              style={{ width: `${height * 100}%` }}
-            />
-          </div>
-        </div>
+            {/* HEIGHT GAUGE (Right Arc) */}
+            <g style={{ transform: `translate(${uiConfig.hgtX}px, ${uiConfig.hgtY}px) scale(${uiConfig.hgtScale})`, transformOrigin: '100px 100px', transition: 'transform 0.1s' }}>
+              {heightArcs.map((arc, i) => (
+                <path key={`hbg-${i}`} d={arc.path} fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="14" strokeLinecap="butt" />
+              ))}
+              {heightArcs.map((arc, i) => arc.active && (
+                <path key={`hfg-${i}`} d={arc.path} fill="none" stroke="url(#gaugeGradient)" strokeWidth="14" strokeLinecap="butt" />
+              ))}
+            </g>
 
-        {/* Curve Gauge */}
-        <div className={`absolute left-1/2 -translate-x-1/2 w-full max-w-md bg-black/40 backdrop-blur-md p-4 rounded-2xl border border-white/10 shadow-2xl h-20 flex items-center justify-center transition-all duration-300 ${phase === "CURVE" ? "scale-105 pointer-events-auto" : "scale-95 pointer-events-none"}`}
-             style={{ opacity: phase === "CURVE" ? uiConfig.crvOpacity : 0, transform: `translateX(-50%) scale(${uiConfig.crvScale})`, transformOrigin: 'bottom center', bottom: `${uiConfig.crvBottom}px`, transition: 'all 0.2s' }}>
-          <span className="absolute -top-4 text-white text-xs font-bold tracking-widest text-white/70">CURVE</span>
-          <div className="w-full h-2 bg-white/20 rounded-full relative overflow-hidden">
-            <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-white/50 -translate-x-1/2"></div>
-            <div 
-              className="absolute top-1/2 -translate-y-1/2 -ml-2 w-4 h-4 rounded-full bg-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.8)]"
-              style={{ left: `${((curve + 1) / 2) * 100}%` }}
-            />
-          </div>
-        </div>
+            {/* CURVE GAUGE (Bottom Track) */}
+            <g style={{ transform: `translate(${uiConfig.crvX}px, ${uiConfig.crvY}px) scale(${uiConfig.crvScale})`, transformOrigin: '100px 100px', transition: 'transform 0.1s' }}>
+              {/* Main curved track */}
+              <path d="M 60,140 A 56,56 0 0,0 140,140" fill="none" stroke="rgba(0,0,0,0.4)" strokeWidth="8" strokeLinecap="round" />
+              {/* Center tick */}
+              <line x1="100" y1="156" x2="100" y2="164" stroke="rgba(255,255,255,0.4)" strokeWidth="3" />
+              
+              {/* Active Sweeping Needle */}
+              {/* Angle: 135 deg to 45 deg mapped from curve (-1 to 1) */}
+              <line 
+                x1={100 + 46 * Math.cos((90 + (curve * -45)) * (Math.PI / 180))} 
+                y1={100 + 46 * Math.sin((90 + (curve * -45)) * (Math.PI / 180))} 
+                x2={100 + 66 * Math.cos((90 + (curve * -45)) * (Math.PI / 180))} 
+                y2={100 + 66 * Math.sin((90 + (curve * -45)) * (Math.PI / 180))} 
+                stroke="white" strokeWidth="4" strokeLinecap="round" className="drop-shadow-[0_0_5px_rgba(255,255,255,0.8)]"
+              />
+            </g>
+
+          </g>
+        </svg>
+      </div>
       </div>
       <audio id="swishAudio" src="/sound_effects/net_swish_impact_01.mp3" preload="auto" />
       <audio id="boingAudio" src="/sound_effects/boing_impact_01.mp3" preload="auto" />
-    </div>
+        </>
+      )}
+    </>
   );
 }

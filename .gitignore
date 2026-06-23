@@ -27,3 +27,7 @@ yarn-error.log*
 
 # vercel
 .vercel
+
+scratch/
+settings.json
+src/app/page_backup.tsx

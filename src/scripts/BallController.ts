@@ -77,13 +77,17 @@ export default class BallController implements IScript {
                     } else {
                         outcome = "MISS!";
                     }
+                } else if (this.hasHitGK && this.mesh.physicsBody && this.mesh.physicsBody.getLinearVelocity().z < 0) {
+                    outcome = "SAVE!";
+                } else if (this.hasHitEnvironment && this.mesh.physicsBody && this.mesh.physicsBody.getLinearVelocity().z < 0) {
+                    outcome = "MISS!";
                 } else if (this._timeSinceKick > 1.0) {
                     const vel = this.mesh.physicsBody?.getLinearVelocity().length() || 0;
                     if (vel < 0.3) {
                         // Ball nearly completely stopped
-                        outcome = this.mesh.position.z > 5 && Math.abs(this.mesh.position.x) < 4 ? "SAVE!" : "MISS!";
+                        outcome = this.hasHitGK ? "SAVE!" : "MISS!";
                     } else if (this._timeSinceKick > 5.0) {
-                        outcome = "SAVE!";
+                        outcome = this.hasHitGK ? "SAVE!" : "MISS!";
                     }
                 }
 

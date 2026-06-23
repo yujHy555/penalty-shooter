@@ -20,7 +20,8 @@
 		"lil-gui": "^0.21.0",
 		"next": "16.2.6",
 		"react": "18.2.0",
-		"react-dom": "18.2.0"
+		"react-dom": "18.2.0",
+		"tailwindcss-animate": "^1.0.7"
 	},
 	"devDependencies": {
 		"@types/node": "^22",

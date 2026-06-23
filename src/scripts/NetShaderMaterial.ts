@@ -22,6 +22,7 @@ export function createNetMaterial(name: string, scene: Scene): CustomMaterial {
     
     netMaterial.diffuseTexture = netTex;
     netMaterial.useAlphaFromDiffuseTexture = true;
+    (netMaterial as any).netTex = netTex;
 
     // Add uniforms for vertex displacement
     netMaterial.AddUniform('localBallPosition', 'vec3', null);
