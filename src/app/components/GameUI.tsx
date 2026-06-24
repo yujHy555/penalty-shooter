@@ -33,7 +33,7 @@ export function GameUI({ onKickParamsUpdate, onKickExecute, phase, setPhase, lev
   const [uiConfig, setUiConfig] = useState<Record<string, any>>({
     levelScale: 1.0, levelOpacity: 1.0, levelTop: 16, levelLeft: 16,
     scoreScale: 1.0, scoreOpacity: 1.0, scoreTop: 16, scoreRight: 16,
-    sbScale: 1.0, sbOpacity: 1.0, sbTop: 80, sbLeft: 16,
+    sbScale: 1.0, sbOpacity: 1.0, sbTop: 80, sbRight: 16,
     centerScale: 0.5, centerOpacity: 1.0, centerTop: 208,
     outcomeScale: 1.7, outcomeOpacity: 1.0, outcomeTop: 120,
     dirScale: 1.0, dirOpacity: 1.0, dirBottom: 303,
@@ -306,7 +306,7 @@ export function GameUI({ onKickParamsUpdate, onKickExecute, phase, setPhase, lev
         
         {/* Scoreboard (Shots) */}
         <div className="absolute pointer-events-none flex items-center space-x-2 bg-black/50 p-3 rounded-2xl border border-white/10 backdrop-blur-sm" 
-             style={{ opacity: uiConfig.sbOpacity, transform: `scale(${uiConfig.sbScale * sceneScale})`, transformOrigin: 'top left', top: `${uiConfig.sbTop * sceneScale}px`, left: `${uiConfig.sbLeft * sceneScale}px`, transition: 'all 0.2s' }}>
+             style={{ opacity: uiConfig.sbOpacity, transform: `scale(${uiConfig.sbScale * sceneScale})`, transformOrigin: 'top right', top: `${uiConfig.sbTop * sceneScale}px`, right: `${uiConfig.sbRight * sceneScale}px`, transition: 'all 0.2s' }}>
           <div className="flex space-x-2">
             {shots?.map((shot, idx) => (
               <div 

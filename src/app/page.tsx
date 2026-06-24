@@ -225,7 +225,7 @@ export default function Home() {
 
 		(window as any).uiSettings = {
 			levelScale: 1, levelOpacity: 1, levelTop: 16, levelLeft: 16,
-			sbScale: 1, sbOpacity: 1, sbTop: 80, sbLeft: 16,
+			sbScale: 1, sbOpacity: 1, sbTop: 80, sbRight: 16,
 			centerScale: 0.5, centerOpacity: 1.0, centerTop: 190,
 			outcomeScale: 1, outcomeOpacity: 1.0, outcomeTop: 120,
 			dirScale: 1.0, dirOpacity: 1.0, dirBottom: 256,
@@ -346,7 +346,7 @@ export default function Home() {
 		sbFolder.add((window as any).uiSettings, 'sbScale', 0.1, 3.0).step(0.05).name('Scale').listen();
 		sbFolder.add((window as any).uiSettings, 'sbOpacity', 0.1, 1.0).step(0.05).name('Opacity').listen();
 		sbFolder.add((window as any).uiSettings, 'sbTop', -1000, 2000).step(1).name('Y Offset').listen();
-		sbFolder.add((window as any).uiSettings, 'sbLeft', -1000, 2000).step(1).name('X Offset').listen();
+		sbFolder.add((window as any).uiSettings, 'sbRight', -1000, 2000).step(1).name('X Offset').listen();
 
 		const centerFolder = uiFolder.addFolder('Center Instruction Text');
 		centerFolder.add((window as any).uiSettings, 'centerScale', 0.1, 5.0).step(0.05).name('Scale').listen();
