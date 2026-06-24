@@ -124,6 +124,7 @@ export default function Home() {
 							if ((window as any).updateLawn) (window as any).updateLawn();
 							if ((window as any).updateSky) (window as any).updateSky();
 							if ((window as any).updateBallTexture) (window as any).updateBallTexture();
+							if ((window as any).updateNet) (window as any).updateNet();
 						}
 						return newLevel;
 					});
@@ -175,7 +176,7 @@ export default function Home() {
 		(window as any).updateCameraResponsive();
 
 		// Developer GUI
-		const gui = new GUI({ title: 'Developer / Debug' });
+		const gui = new GUI({ title: 'Game Debug & Tuning' });
 		(window as any).debugGUI = gui;
 
 		const cameraFolder = gui.addFolder('Camera');
@@ -227,6 +228,14 @@ export default function Home() {
 			levelScale: 1, levelOpacity: 1, levelTop: 16, levelLeft: 16,
 			sbScale: 1, sbOpacity: 1, sbTop: 80, sbRight: 16,
 			centerScale: 0.5, centerOpacity: 1.0, centerTop: 190,
+			
+			// Decoupled Instructions
+			startTextScale: 0.5, startTextTop: 190, startTextLeft: 0, startTextColor: "#ffffff", startTextBgColor: "#000000", startTextBgOpacity: 0.3,
+			dirTextScale: 0.5, dirTextTop: 190, dirTextLeft: 0, dirTextColor: "#ffffff", dirTextBgColor: "#000000", dirTextBgOpacity: 0.3,
+			powerTextScale: 0.5, powerTextTop: 190, powerTextLeft: 0, powerTextColor: "#ffffff", powerTextBgColor: "#000000", powerTextBgOpacity: 0.3,
+			heightTextScale: 0.5, heightTextTop: 190, heightTextLeft: 0, heightTextColor: "#ffffff", heightTextBgColor: "#000000", heightTextBgOpacity: 0.3,
+			curveTextScale: 0.5, curveTextTop: 190, curveTextLeft: 0, curveTextColor: "#ffffff", curveTextBgColor: "#000000", curveTextBgOpacity: 0.3,
+			
 			outcomeScale: 1, outcomeOpacity: 1.0, outcomeTop: 120,
 			dirScale: 1.0, dirOpacity: 1.0, dirBottom: 256,
 			gaugeScale: 1.1, gaugeX: 0,
@@ -352,6 +361,48 @@ export default function Home() {
 		centerFolder.add((window as any).uiSettings, 'centerScale', 0.1, 5.0).step(0.05).name('Scale').listen();
 		centerFolder.add((window as any).uiSettings, 'centerOpacity', 0.1, 1.0).step(0.05).name('Opacity').listen();
 		centerFolder.add((window as any).uiSettings, 'centerTop', -1000, 2000).step(1).name('Y Offset').listen();
+
+		const textsFolder = uiFolder.addFolder('Instruction Texts');
+		
+		const startTextF = textsFolder.addFolder('Text: Tap to Start');
+		startTextF.add((window as any).uiSettings, 'startTextScale', 0.1, 5.0).step(0.05).name('Scale').listen();
+		startTextF.add((window as any).uiSettings, 'startTextTop', -1000, 2000).step(1).name('Y Offset').listen();
+		startTextF.add((window as any).uiSettings, 'startTextLeft', -1000, 2000).step(1).name('X Offset').listen();
+		startTextF.addColor((window as any).uiSettings, 'startTextColor').name('Text Color').listen();
+		startTextF.addColor((window as any).uiSettings, 'startTextBgColor').name('Bg Color').listen();
+		startTextF.add((window as any).uiSettings, 'startTextBgOpacity', 0, 1.0).step(0.05).name('Bg Opacity').listen();
+
+		const dirTextF = textsFolder.addFolder('Text: Lock Direction');
+		dirTextF.add((window as any).uiSettings, 'dirTextScale', 0.1, 5.0).step(0.05).name('Scale').listen();
+		dirTextF.add((window as any).uiSettings, 'dirTextTop', -1000, 2000).step(1).name('Y Offset').listen();
+		dirTextF.add((window as any).uiSettings, 'dirTextLeft', -1000, 2000).step(1).name('X Offset').listen();
+		dirTextF.addColor((window as any).uiSettings, 'dirTextColor').name('Text Color').listen();
+		dirTextF.addColor((window as any).uiSettings, 'dirTextBgColor').name('Bg Color').listen();
+		dirTextF.add((window as any).uiSettings, 'dirTextBgOpacity', 0, 1.0).step(0.05).name('Bg Opacity').listen();
+
+		const pwrTextF = textsFolder.addFolder('Text: Lock Power');
+		pwrTextF.add((window as any).uiSettings, 'powerTextScale', 0.1, 5.0).step(0.05).name('Scale').listen();
+		pwrTextF.add((window as any).uiSettings, 'powerTextTop', -1000, 2000).step(1).name('Y Offset').listen();
+		pwrTextF.add((window as any).uiSettings, 'powerTextLeft', -1000, 2000).step(1).name('X Offset').listen();
+		pwrTextF.addColor((window as any).uiSettings, 'powerTextColor').name('Text Color').listen();
+		pwrTextF.addColor((window as any).uiSettings, 'powerTextBgColor').name('Bg Color').listen();
+		pwrTextF.add((window as any).uiSettings, 'powerTextBgOpacity', 0, 1.0).step(0.05).name('Bg Opacity').listen();
+
+		const hgtTextF = textsFolder.addFolder('Text: Lock Height');
+		hgtTextF.add((window as any).uiSettings, 'heightTextScale', 0.1, 5.0).step(0.05).name('Scale').listen();
+		hgtTextF.add((window as any).uiSettings, 'heightTextTop', -1000, 2000).step(1).name('Y Offset').listen();
+		hgtTextF.add((window as any).uiSettings, 'heightTextLeft', -1000, 2000).step(1).name('X Offset').listen();
+		hgtTextF.addColor((window as any).uiSettings, 'heightTextColor').name('Text Color').listen();
+		hgtTextF.addColor((window as any).uiSettings, 'heightTextBgColor').name('Bg Color').listen();
+		hgtTextF.add((window as any).uiSettings, 'heightTextBgOpacity', 0, 1.0).step(0.05).name('Bg Opacity').listen();
+
+		const crvTextF = textsFolder.addFolder('Text: Lock Curve');
+		crvTextF.add((window as any).uiSettings, 'curveTextScale', 0.1, 5.0).step(0.05).name('Scale').listen();
+		crvTextF.add((window as any).uiSettings, 'curveTextTop', -1000, 2000).step(1).name('Y Offset').listen();
+		crvTextF.add((window as any).uiSettings, 'curveTextLeft', -1000, 2000).step(1).name('X Offset').listen();
+		crvTextF.addColor((window as any).uiSettings, 'curveTextColor').name('Text Color').listen();
+		crvTextF.addColor((window as any).uiSettings, 'curveTextBgColor').name('Bg Color').listen();
+		crvTextF.add((window as any).uiSettings, 'curveTextBgOpacity', 0, 1.0).step(0.05).name('Bg Opacity').listen();
 
 		const outcomeFolder = uiFolder.addFolder('Outcome Text');
 		outcomeFolder.add((window as any).uiSettings, 'outcomeScale', 0.1, 10.0).step(0.05).name('Scale').listen();
@@ -615,7 +666,12 @@ export default function Home() {
 			stripeSize: 0.5,
 			fieldWidth: 75,
 			fieldDepth: 40,
-			netGridScale: 30
+			lvl1NetEnabled: false,
+			lvl1NetGridSize: 30,
+			lvl2NetEnabled: true,
+			lvl2NetGridSize: 30,
+			lvl3NetEnabled: true,
+			lvl3NetGridSize: 30
 		};
 		const updateLawn = () => {
 			if ((window as any).lawnCtx && (window as any).lawnTex) {
@@ -708,18 +764,24 @@ export default function Home() {
 		f1Folder.addColor((window as any).fieldSettings, 'lvl1Solid').name('Solid Color').onChange(updateLawn);
 		f1Folder.addColor((window as any).fieldSettings, 'lvl1Light').name('Striped Light').onChange(updateLawn);
 		f1Folder.addColor((window as any).fieldSettings, 'lvl1Dark').name('Striped Dark').onChange(updateLawn);
+		f1Folder.add((window as any).fieldSettings, 'lvl1NetEnabled').name('Net Enabled').onChange(() => { if ((window as any).updateNet) (window as any).updateNet(); });
+		f1Folder.add((window as any).fieldSettings, 'lvl1NetGridSize', 5, 100).step(1).name('Net Grid Size').onChange(() => { if ((window as any).updateNet) (window as any).updateNet(); });
 
 		const f2Folder = fieldFolder.addFolder('Level 2 Field');
 		f2Folder.add((window as any).fieldSettings, 'lvl2Mode', ["Striped", "Solid"]).name("Pattern").onChange(updateLawn);
 		f2Folder.addColor((window as any).fieldSettings, 'lvl2Solid').name('Solid Color').onChange(updateLawn);
 		f2Folder.addColor((window as any).fieldSettings, 'lvl2Light').name('Striped Light').onChange(updateLawn);
 		f2Folder.addColor((window as any).fieldSettings, 'lvl2Dark').name('Striped Dark').onChange(updateLawn);
+		f2Folder.add((window as any).fieldSettings, 'lvl2NetEnabled').name('Net Enabled').onChange(() => { if ((window as any).updateNet) (window as any).updateNet(); });
+		f2Folder.add((window as any).fieldSettings, 'lvl2NetGridSize', 5, 100).step(1).name('Net Grid Size').onChange(() => { if ((window as any).updateNet) (window as any).updateNet(); });
 
 		const f3Folder = fieldFolder.addFolder('Level 3 Field');
 		f3Folder.add((window as any).fieldSettings, 'lvl3Mode', ["Striped", "Solid"]).name("Pattern").onChange(updateLawn);
 		f3Folder.addColor((window as any).fieldSettings, 'lvl3Solid').name('Solid Color').onChange(updateLawn);
 		f3Folder.addColor((window as any).fieldSettings, 'lvl3Light').name('Striped Light').onChange(updateLawn);
 		f3Folder.addColor((window as any).fieldSettings, 'lvl3Dark').name('Striped Dark').onChange(updateLawn);
+		f3Folder.add((window as any).fieldSettings, 'lvl3NetEnabled').name('Net Enabled').onChange(() => { if ((window as any).updateNet) (window as any).updateNet(); });
+		f3Folder.add((window as any).fieldSettings, 'lvl3NetGridSize', 5, 100).step(1).name('Net Grid Size').onChange(() => { if ((window as any).updateNet) (window as any).updateNet(); });
 
 		const sizeFolder = fieldFolder.addFolder('Field Dimensions');
 		sizeFolder.add((window as any).fieldSettings, 'stripeSize', 0.5, 5).step(0.1).name('Stripe Width').onChange(() => {
@@ -749,15 +811,39 @@ export default function Home() {
 		sizeFolder.add((window as any).fieldSettings, 'fieldWidth', 10, 100).step(1).name('Field Width').onChange(updateFieldDimensions);
 		sizeFolder.add((window as any).fieldSettings, 'fieldDepth', 20, 150).step(1).name('Field Depth').onChange(updateFieldDimensions);
 		
-		(window as any).applyNetGridScale = () => {
+		const updateNet = () => {
+			const level = (window as any).gameManager?.level || 1;
+			const isEnabled = (window as any).fieldSettings[`lvl${level}NetEnabled`];
+			const gridScale = (window as any).fieldSettings[`lvl${level}NetGridSize`];
+
+			// Visual
+			if ((window as any).goalNet) {
+				(window as any).goalNet.isVisible = isEnabled;
+			}
+
+			// Texture Scale
 			if ((window as any).netMat && (window as any).netMat.netTex) {
-				const goalWidth = 7.32; // Physical width of the goal
-				const baseScale = (window as any).fieldSettings.netGridScale / goalWidth;
+				const goalWidth = 7.32;
+				const baseScale = gridScale / goalWidth;
 				(window as any).netMat.netTex.uScale = baseScale;
 				(window as any).netMat.netTex.vScale = baseScale;
 			}
+
+			// Physics
+			const colNames = ["colBack", "colTop", "colLeft", "colRight"];
+			colNames.forEach(name => {
+				const mesh = scene.getMeshByName(name);
+				if (mesh && mesh.physicsBody) {
+					if (!isEnabled) {
+						mesh.position.y = -100;
+					} else {
+						if (name === "colTop") mesh.position.y = 2.44;
+						else mesh.position.y = 2.44 / 2;
+					}
+				}
+			});
 		};
-		sizeFolder.add((window as any).fieldSettings, 'netGridScale', 5, 100).step(1).name('Net Grid Size').onChange((window as any).applyNetGridScale);
+		(window as any).updateNet = updateNet;
 
 		// Field Lines UI
 		(window as any).fieldLinesSettings = {
@@ -866,7 +952,8 @@ export default function Home() {
 		saveFolder.add(settingsManager, 'printToConsole').name('Print to Console');
 
 		// Load from local storage immediately to override the default
-		const userProvidedState = `{"controllers":{},"folders":{"Camera":{"controllers":{"FOV":0.72,"Pos X":0,"Pos Y":0.5,"Pos Z":-3.3,"Pitch (X)":0.1243550000306659,"Yaw (Y)":0,"Roll (Z)":0,"Shake Intensity":0.05,"Shake Speed":50,"Shake Duration":0.8},"folders":{},"closed":true},"Audio Settings":{"controllers":{"Kick Volume":0.6,"Net Swish Volume":1,"Boing Volume":1},"folders":{},"closed":true},"UI Elements":{"controllers":{},"folders":{"Test Screens":{"controllers":{},"folders":{},"closed":false},"Endgame Screen":{"controllers":{"Bg Opacity":0.8,"Title Scale":1,"Title Y Offset":0,"Title Color":"#ffffff","Subtitle Scale":1,"Subtitle Y Offset":0,"Subtitle Color":"#ffffff","Button Scale":1,"Button Y Offset":0,"Button Text Color":"#ffffff","Button Bg Color":"#22c55e"},"folders":{},"closed":false},"Level Complete Screen":{"controllers":{"Bg Opacity":0.6,"Title Scale":1,"Title Y Offset":0,"Title Color":"#facc15","Subtitle Scale":1,"Subtitle Y Offset":0,"Subtitle Color":"#ffffff","Icon Scale":1,"Icon Y Offset":0,"Icon Color":"#facc15","Button Scale":1,"Button Y Offset":0,"Button Text Color":"#000000","Button Bg Color":"#ff6bba"},"folders":{},"closed":false},"Level Failed Screen":{"controllers":{"Bg Opacity":0.8,"Title Scale":1,"Title Y Offset":0,"Title Color":"#f87171","Subtitle Scale":1,"Subtitle Y Offset":0,"Subtitle Color":"#d1d5db","Button Scale":1,"Button Y Offset":0,"Button Text Color":"#ffffff","Button Bg Color":"#22c55e"},"folders":{},"closed":false},"Level Badge":{"controllers":{"Scale":3,"Opacity":1,"Y Offset":16,"X Offset":16},"folders":{},"closed":false},"Scoreboard (Shots)":{"controllers":{"Scale":1.8,"Opacity":1,"Y Offset":45,"X Offset":45},"folders":{},"closed":false},"Center Instruction Text":{"controllers":{"Scale":0.8,"Opacity":1,"Y Offset":86},"folders":{},"closed":false},"Outcome Text":{"controllers":{"Scale":1.65,"Opacity":1,"Y Offset":90},"folders":{},"closed":false},"Direction / Text Overlays":{"controllers":{"Center Text Scale":0.8,"Center Text Y Offset":86,"Outcome Text Scale":1.65,"Outcome Text Y Offset":90},"folders":{},"closed":false},"Retro Gauges Config":{"controllers":{"Global Y Position":38,"Global X Position":0,"Global Size":1.7},"folders":{"Direction Arrow":{"controllers":{"Speed Lvl 1":2.6,"Speed Lvl 2":3.5,"Speed Lvl 3":4.5,"Arrow Color":"#ffff00","Jiggle Intensity":0.15,"Jiggle Speed":40,"Jiggle Decay":5,"Jiggle Duration":1},"folders":{},"closed":false},"Power Gauge":{"controllers":{"Scale":1,"X Offset":0,"Y Offset":0,"Speed":5.5},"folders":{},"closed":false},"Height Gauge":{"controllers":{"Scale":1,"X Offset":0,"Y Offset":0,"Speed":5.5,"Power Mult Lvl 1":0,"Power Mult Lvl 2":0.5,"Power Mult Lvl 3":1},"folders":{},"closed":false},"Curve Gauge":{"controllers":{"Scale":1,"X Offset":0,"Y Offset":27,"Speed":5.5},"folders":{},"closed":false}},"closed":false}},"closed":true},"Preloader":{"controllers":{"Spinner Scale":1,"Spinner Y Offset":0,"Title Scale":1,"Title Y Offset":0,"Subtitle Scale":1,"Subtitle Y Offset":0},"folders":{},"closed":true},"Game Physics & Rules":{"controllers":{"Ball Mass":3.1,"World Gravity":-14,"Kick Power":0.9,"Kick Height":1,"Curve Force":8,"Net Bulge Multiplier":0.9,"Net Impact Radius":1.9,"Net Ripple Amplitude":0.4,"Net Ripple Speed":9,"Signboard Bounciness":0.6,"Signboard Friction":0.5},"folders":{},"closed":true},"Goalkeeper Tuning":{"controllers":{"Idle Anim FPS":12,"Jump Speed":3,"Jump Arc Gravity":50,"Max Jump Height":1.3,"Size (Level 1)":1,"Size (Level 2)":1.05,"Size (Level 3)":1.1},"folders":{"Landing Dust Effect":{"controllers":{"Scale":0.6,"X Offset":0,"Y Offset":-1.2,"Speed":1,"Opacity":1,"Min Jump Height":1.1},"folders":{},"closed":false}},"closed":true},"Goalkeeper AI Difficulty":{"controllers":{},"folders":{"Level 1":{"controllers":{"Wrong Way %":0.2,"Prediction Error":0.9},"folders":{},"closed":false},"Level 2":{"controllers":{"Wrong Way %":0.2,"Prediction Error":0.7},"folders":{},"closed":false},"Level 3":{"controllers":{"Wrong Way %":0.05,"Prediction Error":0.8},"folders":{},"closed":false}},"closed":true},"Collider Tuning":{"controllers":{"Show Colliders":false,"Ball Size":0.24,"Visual Y Offset":-0.12,"Post Size":0.12,"Net Depth":0.1,"Field Thickness":1,"GK Capsule Radius":0.3},"folders":{},"closed":true},"Level Select (Testing)":{"controllers":{},"folders":{},"closed":false},"Field Appearance":{"controllers":{},"folders":{"Level 1 Field":{"controllers":{"Pattern":"Solid","Solid Color":"#b98764","Striped Light":"#a3d27f","Striped Dark":"#b1df90"},"folders":{},"closed":false},"Level 2 Field":{"controllers":{"Pattern":"Solid","Solid Color":"#5ecd93","Striped Light":"#d3ec79","Striped Dark":"#b3e38c"},"folders":{},"closed":false},"Level 3 Field":{"controllers":{"Pattern":"Striped","Solid Color":"#60ce95","Striped Light":"#60ce95","Striped Dark":"#00b155"},"folders":{},"closed":false},"Field Dimensions":{"controllers":{"Stripe Width":0.5,"Field Width":75,"Field Depth":40,"Net Grid Size":30},"folders":{},"closed":false},"Level 1 Field Lines":{"controllers":{"Line Color":"#8b5427","posX":0,"posY":0.002,"posZ":1,"scale":1},"folders":{},"closed":false},"Level 2 Field Lines":{"controllers":{"Line Color":"#ffffff","posX":0,"posY":0.002,"posZ":1,"scale":1},"folders":{},"closed":false},"Level 3 Field Lines":{"controllers":{"Line Color":"#ffffff","posX":0,"posY":0.002,"posZ":1,"scale":1},"folders":{},"closed":false}},"closed":true},"💾 Save / Export":{"controllers":{},"folders":{},"closed":false},"Signboard":{"controllers":{},"folders":{"Level 1":{"controllers":{"Width":47.35,"Height":0.7755,"Pos Z":12.5,"Pos Y":0,"uScale":10},"folders":{},"closed":false},"Level 2":{"controllers":{"Width":47.35,"Height":0.7755,"Pos Z":12.5,"Pos Y":0,"uScale":10},"folders":{},"closed":false},"Level 3":{"controllers":{"Width":47.35,"Height":0.7755,"Pos Z":12.5,"Pos Y":0,"uScale":10},"folders":{},"closed":false}},"closed":true},"Crowd Characters":{"controllers":{},"folders":{"Level 1":{"controllers":{},"folders":{"Character 1":{"controllers":{"Enabled":true,"Texture Path":"/crowd_level_01/crowd_man_01.png","Pos X":-6.8,"Pos Y":0,"Pos Z":14.040180080520576,"Scale":2.25,"Jump Height":1,"Jump Speed":10,"Jump Duration":2},"folders":{},"closed":true},"Character 2":{"controllers":{"Enabled":true,"Texture Path":"/crowd_level_01/crowd_man_02.png","Pos X":7.8,"Pos Y":0,"Pos Z":15.091522762283393,"Scale":1.9326,"Jump Height":1,"Jump Speed":10,"Jump Duration":2},"folders":{},"closed":true},"Character 3":{"controllers":{"Enabled":false,"Texture Path":"/crowd_level_01/crowd_man_01.png","Pos X":0,"Pos Y":0,"Pos Z":15.308819507164111,"Scale":1.5,"Jump Height":1,"Jump Speed":10,"Jump Duration":2},"folders":{},"closed":true},"Character 4":{"controllers":{"Enabled":false,"Texture Path":"/crowd_level_01/crowd_man_01.png","Pos X":2,"Pos Y":0,"Pos Z":14.50240388193018,"Scale":1.5,"Jump Height":1,"Jump Speed":10,"Jump Duration":2},"folders":{},"closed":true},"Character 5":{"controllers":{"Enabled":false,"Texture Path":"/crowd_level_01/crowd_man_01.png","Pos X":4,"Pos Y":0,"Pos Z":14.723105130517377,"Scale":1.5,"Jump Height":1,"Jump Speed":10,"Jump Duration":2},"folders":{},"closed":true},"Character 6":{"controllers":{"Enabled":false,"Texture Path":"/crowd_level_01/crowd_man_01.png","Pos X":6,"Pos Y":0,"Pos Z":15.735629147074318,"Scale":1.5,"Jump Height":1,"Jump Speed":10,"Jump Duration":2},"folders":{},"closed":true},"Character 7":{"controllers":{"Enabled":false,"Texture Path":"/crowd_level_01/crowd_man_01.png","Pos X":8,"Pos Y":0,"Pos Z":15.556004459443853,"Scale":1.5,"Jump Height":1,"Jump Speed":10,"Jump Duration":2},"folders":{},"closed":true},"Character 8":{"controllers":{"Enabled":false,"Texture Path":"/crowd_level_01/crowd_man_01.png","Pos X":10,"Pos Y":0,"Pos Z":14.453435697563393,"Scale":1.5,"Jump Height":1,"Jump Speed":10,"Jump Duration":2},"folders":{},"closed":true},"Character 9":{"controllers":{"Enabled":false,"Texture Path":"/crowd_level_01/crowd_man_01.png","Pos X":12,"Pos Y":0,"Pos Z":14.892153025390307,"Scale":1.5,"Jump Height":1,"Jump Speed":10,"Jump Duration":2},"folders":{},"closed":true},"Character 10":{"controllers":{"Enabled":false,"Texture Path":"/crowd_level_01/crowd_man_01.png","Pos X":14,"Pos Y":0,"Pos Z":15.801631140013455,"Scale":1.5,"Jump Height":1,"Jump Speed":10,"Jump Duration":2},"folders":{},"closed":true}},"closed":true},"Level 2":{"controllers":{},"folders":{"Character 1":{"controllers":{"Enabled":false,"Texture Path":"/crowd_level_02/crowd_man_01.png","Pos X":-4,"Pos Y":0,"Pos Z":14.480919068747305,"Scale":1.5,"Jump Height":1,"Jump Speed":10,"Jump Duration":2},"folders":{},"closed":true},"Character 2":{"controllers":{"Enabled":false,"Texture Path":"/crowd_level_02/crowd_man_01.png","Pos X":-2,"Pos Y":0,"Pos Z":14.926974028012198,"Scale":1.5,"Jump Height":1,"Jump Speed":10,"Jump Duration":2},"folders":{},"closed":true},"Character 3":{"controllers":{"Enabled":false,"Texture Path":"/crowd_level_02/crowd_man_01.png","Pos X":0,"Pos Y":0,"Pos Z":15.999742573940587,"Scale":1.5,"Jump Height":1,"Jump Speed":10,"Jump Duration":2},"folders":{},"closed":true},"Character 4":{"controllers":{"Enabled":false,"Texture Path":"/crowd_level_02/crowd_man_01.png","Pos X":2,"Pos Y":0,"Pos Z":14.403774817828715,"Scale":1.5,"Jump Height":1,"Jump Speed":10,"Jump Duration":2},"folders":{},"closed":true},"Character 5":{"controllers":{"Enabled":false,"Texture Path":"/crowd_level_02/crowd_man_01.png","Pos X":4,"Pos Y":0,"Pos Z":14.110329596646563,"Scale":1.5,"Jump Height":1,"Jump Speed":10,"Jump Duration":2},"folders":{},"closed":true},"Character 6":{"controllers":{"Enabled":false,"Texture Path":"/crowd_level_02/crowd_man_01.png","Pos X":6,"Pos Y":0,"Pos Z":15.509952360452843,"Scale":1.5,"Jump Height":1,"Jump Speed":10,"Jump Duration":2},"folders":{},"closed":true},"Character 7":{"controllers":{"Enabled":false,"Texture Path":"/crowd_level_02/crowd_man_01.png","Pos X":8,"Pos Y":0,"Pos Z":15.777060136373551,"Scale":1.5,"Jump Height":1,"Jump Speed":10,"Jump Duration":2},"folders":{},"closed":true},"Character 8":{"controllers":{"Enabled":false,"Texture Path":"/crowd_level_02/crowd_man_01.png","Pos X":10,"Pos Y":0,"Pos Z":14.196260920664946,"Scale":1.5,"Jump Height":1,"Jump Speed":10,"Jump Duration":2},"folders":{},"closed":true},"Character 9":{"controllers":{"Enabled":false,"Texture Path":"/crowd_level_02/crowd_man_01.png","Pos X":12,"Pos Y":0,"Pos Z":14.991667554460692,"Scale":1.5,"Jump Height":1,"Jump Speed":10,"Jump Duration":2},"folders":{},"closed":true},"Character 10":{"controllers":{"Enabled":false,"Texture Path":"/crowd_level_02/crowd_man_01.png","Pos X":14,"Pos Y":0,"Pos Z":15.290171562509729,"Scale":1.5,"Jump Height":1,"Jump Speed":10,"Jump Duration":2},"folders":{},"closed":true}},"closed":true},"Level 3":{"controllers":{},"folders":{"Character 1":{"controllers":{"Enabled":false,"Texture Path":"/crowd_level_03/crowd_man_01.png","Pos X":-4,"Pos Y":0,"Pos Z":15.741981559389991,"Scale":1.5,"Jump Height":1,"Jump Speed":10,"Jump Duration":2},"folders":{},"closed":true},"Character 2":{"controllers":{"Enabled":false,"Texture Path":"/crowd_level_03/crowd_man_01.png","Pos X":-2,"Pos Y":0,"Pos Z":14.324954940222423,"Scale":1.5,"Jump Height":1,"Jump Speed":10,"Jump Duration":2},"folders":{},"closed":true},"Character 3":{"controllers":{"Enabled":false,"Texture Path":"/crowd_level_03/crowd_man_01.png","Pos X":0,"Pos Y":0,"Pos Z":14.726494321896105,"Scale":1.5,"Jump Height":1,"Jump Speed":10,"Jump Duration":2},"folders":{},"closed":true},"Character 4":{"controllers":{"Enabled":false,"Texture Path":"/crowd_level_03/crowd_man_01.png","Pos X":2,"Pos Y":0,"Pos Z":14.373757835068075,"Scale":1.5,"Jump Height":1,"Jump Speed":10,"Jump Duration":2},"folders":{},"closed":true},"Character 5":{"controllers":{"Enabled":false,"Texture Path":"/crowd_level_03/crowd_man_01.png","Pos X":4,"Pos Y":0,"Pos Z":15.18676775233867,"Scale":1.5,"Jump Height":1,"Jump Speed":10,"Jump Duration":2},"folders":{},"closed":true},"Character 6":{"controllers":{"Enabled":false,"Texture Path":"/crowd_level_03/crowd_man_01.png","Pos X":6,"Pos Y":0,"Pos Z":15.84313571064792,"Scale":1.5,"Jump Height":1,"Jump Speed":10,"Jump Duration":2},"folders":{},"closed":true},"Character 7":{"controllers":{"Enabled":false,"Texture Path":"/crowd_level_03/crowd_man_01.png","Pos X":8,"Pos Y":0,"Pos Z":14.98584933356153,"Scale":1.5,"Jump Height":1,"Jump Speed":10,"Jump Duration":2},"folders":{},"closed":true},"Character 8":{"controllers":{"Enabled":false,"Texture Path":"/crowd_level_03/crowd_man_01.png","Pos X":10,"Pos Y":0,"Pos Z":15.6021725580205,"Scale":1.5,"Jump Height":1,"Jump Speed":10,"Jump Duration":2},"folders":{},"closed":true},"Character 9":{"controllers":{"Enabled":false,"Texture Path":"/crowd_level_03/crowd_man_01.png","Pos X":12,"Pos Y":0,"Pos Z":14.874936372876103,"Scale":1.5,"Jump Height":1,"Jump Speed":10,"Jump Duration":2},"folders":{},"closed":true},"Character 10":{"controllers":{"Enabled":false,"Texture Path":"/crowd_level_03/crowd_man_01.png","Pos X":14,"Pos Y":0,"Pos Z":14.780330448497807,"Scale":1.5,"Jump Height":1,"Jump Speed":10,"Jump Duration":2},"folders":{},"closed":true}},"closed":true}},"closed":true},"Cloud Layer":{"controllers":{"Scroll Speed":1.48},"folders":{"Level 1":{"controllers":{},"folders":{"Cloud 1":{"controllers":{"Enabled":true,"Texture Path":"/clouds_level_01/level_01_cloud_01.png","Pos X":44.99855599998583,"Pos Y":5.1,"Pos Z":25.980119798422283,"Scale":4},"folders":{},"closed":true},"Cloud 2":{"controllers":{"Enabled":true,"Texture Path":"/clouds_level_01/level_01_cloud_02.png","Pos X":-32.86688399956337,"Pos Y":3.81,"Pos Z":27.072977316867853,"Scale":4},"folders":{},"closed":true},"Cloud 3":{"controllers":{"Enabled":true,"Texture Path":"/clouds_level_01/level_01_cloud_03.png","Pos X":-17.866883999561164,"Pos Y":2.49,"Pos Z":29.822848983062176,"Scale":6.0899},"folders":{},"closed":true},"Cloud 4":{"controllers":{"Enabled":false,"Texture Path":"/clouds_level_01/cloud_01.png","Pos X":35,"Pos Y":9.985142173312482,"Pos Z":29.786784399552275,"Scale":4},"folders":{},"closed":true},"Cloud 5":{"controllers":{"Enabled":false,"Texture Path":"/clouds_level_01/cloud_01.png","Pos X":50,"Pos Y":9.431766976809987,"Pos Z":29.801210428731462,"Scale":4},"folders":{},"closed":true}},"closed":true},"Level 2":{"controllers":{},"folders":{"Cloud 1":{"controllers":{"Enabled":true,"Texture Path":"/clouds_level_02/level_02_cloud_01.png","Pos X":-8.090244000098624,"Pos Y":5.1,"Pos Z":28.914898038784617,"Scale":10.1495},"folders":{},"closed":true},"Cloud 2":{"controllers":{"Enabled":true,"Texture Path":"/clouds_level_02/level_02_cloud_02.png","Pos X":27.228299999916363,"Pos Y":3.36,"Pos Z":28.97873648941075,"Scale":9.8709},"folders":{},"closed":true},"Cloud 3":{"controllers":{"Enabled":false,"Texture Path":"/clouds_level_02/cloud_01.png","Pos X":20,"Pos Y":10.303109383878681,"Pos Z":26.548887210941402,"Scale":4},"folders":{},"closed":true},"Cloud 4":{"controllers":{"Enabled":false,"Texture Path":"/clouds_level_02/cloud_01.png","Pos X":35,"Pos Y":11.30480457820917,"Pos Z":27.347403700083742,"Scale":4},"folders":{},"closed":true},"Cloud 5":{"controllers":{"Enabled":false,"Texture Path":"/clouds_level_02/cloud_01.png","Pos X":50,"Pos Y":8.852465298019531,"Pos Z":26.227475699323456,"Scale":4},"folders":{},"closed":true}},"closed":true},"Level 3":{"controllers":{},"folders":{"Cloud 1":{"controllers":{"Enabled":false,"Texture Path":"/clouds_level_03/cloud_01.png","Pos X":-10,"Pos Y":9.392251580367438,"Pos Z":29.483255014447163,"Scale":4},"folders":{},"closed":true},"Cloud 2":{"controllers":{"Enabled":false,"Texture Path":"/clouds_level_03/cloud_01.png","Pos X":5,"Pos Y":8.041467433161525,"Pos Z":29.131106897925186,"Scale":4},"folders":{},"closed":true},"Cloud 3":{"controllers":{"Enabled":false,"Texture Path":"/clouds_level_03/cloud_01.png","Pos X":20,"Pos Y":10.659820183424628,"Pos Z":26.4791038702554,"Scale":4},"folders":{},"closed":true},"Cloud 4":{"controllers":{"Enabled":false,"Texture Path":"/clouds_level_03/cloud_01.png","Pos X":35,"Pos Y":10.238197888698977,"Pos Z":25.354992928567857,"Scale":4},"folders":{},"closed":true},"Cloud 5":{"controllers":{"Enabled":false,"Texture Path":"/clouds_level_03/cloud_01.png","Pos X":50,"Pos Y":8.704645354298375,"Pos Z":29.3462850063655,"Scale":4},"folders":{},"closed":true}},"closed":true}},"closed":true},"Confetti":{"controllers":{"Gravity":-18.69,"Burst Power":25,"Dispersion / Spread":1.5,"Size":0.2349,"Shower Rate":30,"Burst Density":100},"folders":{},"closed":true},"Fake Shadows":{"controllers":{"opacity":0.15,"softness":0.16,"ballSize":0.24,"gkSize":1},"folders":{},"closed":true},"Goalkeeper Impact Effect":{"controllers":{"Core Color":"#ffcc33","Edge Color":"#ff661a","Min Size":0.3,"Max Size":1,"Particle Count":2000,"Min Burst Speed":10,"Max Burst Speed":47.134},"folders":{},"closed":true},"Anime Speedlines Effect":{"controllers":{"Line Color":"#e6f2ff","Animation Speed":30,"Line Density":150,"Line Thickness (inverse)":0.85,"Min Power Required":0.8,"Intensity Multiplier":5},"folders":{},"closed":true},"Environment":{"controllers":{},"folders":{"Level 1 Sky":{"controllers":{"Sky Color":"#23baec"},"folders":{},"closed":false},"Level 2 Sky":{"controllers":{"Sky Color":"#c490c0"},"folders":{},"closed":false},"Level 3 Sky":{"controllers":{"Sky Color":"#101820"},"folders":{},"closed":false}},"closed":true},"Power Rings":{"controllers":{"Base Size":0.1927,"Max Size":1.5,"Opacity":0.1594,"Ring Thickness":40},"folders":{},"closed":true}},"closed":false}`;
+		const userProvidedStateObj = require('./settings.json');
+		const userProvidedState = JSON.stringify(userProvidedStateObj);
 		const defaultSettingsStr = `{"lilGuiState": ${userProvidedState}}`;
 		const savedStr = localStorage.getItem('game_debug_settings') || defaultSettingsStr;
 
@@ -950,7 +1037,6 @@ export default function Home() {
 		lawnTex.wrapU = Texture.WRAP_ADDRESSMODE;
 		lawnTex.wrapV = Texture.WRAP_ADDRESSMODE;
 		lawnTex.vScale = (window as any).fieldSettings.fieldDepth / ((window as any).fieldSettings.stripeSize * 2);
-		lawnTex.uScale = 1;
 		lawnTex.gammaSpace = false; // Prevents Babylon from converting the canvas hex colors to linear (darkening them)
 
 		groundMat.diffuseTexture = lawnTex;
@@ -1026,6 +1112,7 @@ export default function Home() {
 		// Merge all net panels into a single connected mesh (multiMultiMaterials = false to preserve continuous UVs)
 		const goalNet = Mesh.MergeMeshes([netBack, netTop, netLeft, netRight], true, true, undefined, false, false);
 		if (goalNet) {
+			(window as any).goalNet = goalNet;
 			goalNet.name = "goalNet";
 			goalNet.material = netMat;
 		}
@@ -1039,21 +1126,27 @@ export default function Home() {
 		colBack.position = new Vector3(0, goalHeight / 2, 11.0); 
 		colBack.material = collisionMat;
 		new PhysicsAggregate(colBack, PhysicsShapeType.BOX, { mass: 0, restitution: 0.0, friction: 0.8 }, scene);
+		if (colBack.physicsBody) colBack.physicsBody.disablePreStep = false;
 
 		const colTop = MeshBuilder.CreateBox("colTop", { width: goalWidth, height: 0.1, depth: 1.0 }, scene);
 		colTop.position = new Vector3(0, goalHeight, 10.5); 
 		colTop.material = collisionMat;
 		new PhysicsAggregate(colTop, PhysicsShapeType.BOX, { mass: 0, restitution: 0.0, friction: 0.8 }, scene);
+		if (colTop.physicsBody) colTop.physicsBody.disablePreStep = false;
 
 		const colLeft = MeshBuilder.CreateBox("colLeft", { width: 0.1, height: goalHeight, depth: 1.0 }, scene);
 		colLeft.position = new Vector3(-(goalWidth / 2), goalHeight / 2, 10.5);
 		colLeft.material = collisionMat;
 		new PhysicsAggregate(colLeft, PhysicsShapeType.BOX, { mass: 0, restitution: 0.0, friction: 0.8 }, scene);
+		if (colLeft.physicsBody) colLeft.physicsBody.disablePreStep = false;
 
 		const colRight = MeshBuilder.CreateBox("colRight", { width: 0.1, height: goalHeight, depth: 1.0 }, scene);
 		colRight.position = new Vector3((goalWidth / 2), goalHeight / 2, 10.5);
 		colRight.material = collisionMat;
 		new PhysicsAggregate(colRight, PhysicsShapeType.BOX, { mass: 0, restitution: 0.0, friction: 0.8 }, scene);
+		if (colRight.physicsBody) colRight.physicsBody.disablePreStep = false;
+		
+		if ((window as any).updateNet) (window as any).updateNet();
 
 		// Signboard
 		const signboardTex = new Texture("/textures/signboard_03.png", scene);

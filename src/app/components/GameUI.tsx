@@ -328,21 +328,81 @@ export function GameUI({ onKickParamsUpdate, onKickExecute, phase, setPhase, lev
           </div>
         </div>
 
-        {/* Center Instructions (Tap to start) */}
-        <div className="flex justify-center pointer-events-none absolute w-full left-0" style={{ top: `${windowSize.h / 2 - (540 - uiConfig.centerTop) * sceneScale}px`, opacity: uiConfig.centerOpacity, transition: 'all 0.2s' }}>
-          <div style={{ transform: `scale(${uiConfig.centerScale * sceneScale})`, transformOrigin: 'top center' }}>
-            {phase === "IDLE" && (
-            <h1 className="text-6xl text-white font-black drop-shadow-2xl animate-pulse whitespace-nowrap">
-              TAP TO START
-            </h1>
-            )}
-            {phase !== "IDLE" && phase !== "KICKED" && phase !== "ENDGAME" && (
-            <h2 className="text-2xl text-white font-bold drop-shadow-lg bg-black/30 px-6 py-2 rounded-full backdrop-blur-sm whitespace-nowrap">
-              TAP TO LOCK {phase}
-            </h2>
-            )}
-          </div>
-        </div>
+        {/* Center Instructions (Tap to start / Tap to lock) */}
+        {(() => {
+          let scale = uiConfig.centerScale;
+          let top = uiConfig.centerTop;
+          let left = 0;
+          let color = "#ffffff";
+          let bgColor = "#000000";
+          let bgOpacity = 0.3;
+          let text = "";
+
+          if (phase === "IDLE") {
+            scale = uiConfig.startTextScale ?? uiConfig.centerScale;
+            top = uiConfig.startTextTop ?? uiConfig.centerTop;
+            left = uiConfig.startTextLeft ?? 0;
+            color = uiConfig.startTextColor ?? "#ffffff";
+            bgColor = uiConfig.startTextBgColor ?? "#000000";
+            bgOpacity = uiConfig.startTextBgOpacity ?? 0.3;
+            text = "TAP TO START";
+          } else if (phase === "DIRECTION") {
+            scale = uiConfig.dirTextScale ?? uiConfig.centerScale;
+            top = uiConfig.dirTextTop ?? uiConfig.centerTop;
+            left = uiConfig.dirTextLeft ?? 0;
+            color = uiConfig.dirTextColor ?? "#ffffff";
+            bgColor = uiConfig.dirTextBgColor ?? "#000000";
+            bgOpacity = uiConfig.dirTextBgOpacity ?? 0.3;
+            text = "TAP TO LOCK DIRECTION";
+          } else if (phase === "POWER") {
+            scale = uiConfig.powerTextScale ?? uiConfig.centerScale;
+            top = uiConfig.powerTextTop ?? uiConfig.centerTop;
+            left = uiConfig.powerTextLeft ?? 0;
+            color = uiConfig.powerTextColor ?? "#ffffff";
+            bgColor = uiConfig.powerTextBgColor ?? "#000000";
+            bgOpacity = uiConfig.powerTextBgOpacity ?? 0.3;
+            text = "TAP TO LOCK POWER";
+          } else if (phase === "HEIGHT") {
+            scale = uiConfig.heightTextScale ?? uiConfig.centerScale;
+            top = uiConfig.heightTextTop ?? uiConfig.centerTop;
+            left = uiConfig.heightTextLeft ?? 0;
+            color = uiConfig.heightTextColor ?? "#ffffff";
+            bgColor = uiConfig.heightTextBgColor ?? "#000000";
+            bgOpacity = uiConfig.heightTextBgOpacity ?? 0.3;
+            text = "TAP TO LOCK HEIGHT";
+          } else if (phase === "CURVE") {
+            scale = uiConfig.curveTextScale ?? uiConfig.centerScale;
+            top = uiConfig.curveTextTop ?? uiConfig.centerTop;
+            left = uiConfig.curveTextLeft ?? 0;
+            color = uiConfig.curveTextColor ?? "#ffffff";
+            bgColor = uiConfig.curveTextBgColor ?? "#000000";
+            bgOpacity = uiConfig.curveTextBgOpacity ?? 0.3;
+            text = "TAP TO LOCK CURVE";
+          }
+
+          if (!text) return null;
+
+          const hexToRgb = (hex: string) => {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : '0, 0, 0';
+          };
+
+          return (
+            <div className="flex justify-center pointer-events-none absolute w-full left-0" style={{ top: `${windowSize.h / 2 - (540 - top) * sceneScale}px`, marginLeft: `${left * sceneScale}px`, opacity: uiConfig.centerOpacity, transition: 'all 0.2s' }}>
+              <div style={{ transform: `scale(${scale * sceneScale})`, transformOrigin: 'top center' }}>
+                {phase === "IDLE" ? (
+                  <h1 className="text-6xl font-black drop-shadow-2xl animate-pulse whitespace-nowrap" style={{ color: color }}>
+                    {text}
+                  </h1>
+                ) : (
+                  <h2 className="text-2xl font-bold drop-shadow-lg px-6 py-2 rounded-full backdrop-blur-sm whitespace-nowrap" style={{ color: color, backgroundColor: `rgba(${hexToRgb(bgColor)}, ${bgOpacity})` }}>
+                    {text}
+                  </h2>
+                )}
+              </div>
+            </div>
+          );
+        })()}
         {outcomeText && (
           <div className="flex justify-center pointer-events-none absolute w-full left-0"
                style={{ top: `${windowSize.h / 2 - (540 - uiConfig.outcomeTop) * sceneScale}px`, opacity: uiConfig.outcomeOpacity, transition: 'all 0.2s' }}>
