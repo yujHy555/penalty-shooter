@@ -1334,7 +1334,7 @@ export default function Home() {
 				plane.position.z = cloudSettings[`lvl${l}_${s}_z`];
 
 				const mat = new StandardMaterial(`cloudMat_l${l}_s${s}`, scene);
-				mat.diffuseTexture = new Texture(cloudSettings[`lvl${l}_${s}_tex`], scene, true, true, Texture.NEAREST_SAMPLINGMODE);
+				mat.diffuseTexture = new Texture(cloudSettings[`lvl${l}_${s}_tex`], scene, false, true);
 				mat.diffuseTexture.hasAlpha = true;
 				mat.useAlphaFromDiffuseTexture = true;
 				mat.specularColor = new Color3(0, 0, 0);
