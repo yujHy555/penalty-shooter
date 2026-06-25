@@ -159,7 +159,6 @@ export default function Home() {
 			}
 			scene.dispose();
 			engine.dispose();
-			window.removeEventListener("resize", listener);
 		};
 	}, [canvasRef]);
 
