@@ -88,11 +88,10 @@ export default function Home() {
 		}
 
 		const dpr = typeof window !== 'undefined' ? Math.min(window.devicePixelRatio, 2) : 1;
-		const engine = new Engine(canvasRef.current, true, {
+		const engine = new Engine(canvasRef.current, dpr <= 1, {
 			stencil: true,
 			antialias: dpr <= 1,
 			audioEngine: true,
-			adaptToDeviceRatio: true,
 			powerPreference: "high-performance",
 		});
 		engine.setHardwareScalingLevel(1 / dpr);
@@ -135,15 +134,25 @@ export default function Home() {
 			setIsLoading(false);
 		});
 
-		let listener: () => void;
-		window.addEventListener("resize", listener = () => {
-			engine.resize();
-			if ((window as any).updateCameraResponsive) {
-				(window as any).updateCameraResponsive();
-			}
-		});
+		let resizeTimeout: NodeJS.Timeout;
+		const resizeListener = () => {
+			clearTimeout(resizeTimeout);
+			resizeTimeout = setTimeout(() => {
+				if (engine) {
+					engine.resize();
+				}
+				if ((window as any).updateCameraResponsive) {
+					(window as any).updateCameraResponsive();
+				}
+			}, 150); // 150ms allows iOS Safari to finish address-bar UI animation before calculating size
+		};
+		window.addEventListener("resize", resizeListener);
+		window.addEventListener("orientationchange", resizeListener);
 
 		return () => {
+			clearTimeout(resizeTimeout);
+			window.removeEventListener("resize", resizeListener);
+			window.removeEventListener("orientationchange", resizeListener);
 			if ((window as any).debugGUI) {
 				(window as any).debugGUI.destroy();
 				(window as any).debugGUI = null;
