@@ -1235,6 +1235,95 @@ export default function Home() {
 		sbLvl3.add((window as any).signboardSettings, 'lvl3PosY', -2, 10).name('Pos Y').onChange(updateSignboard);
 		sbLvl3.add((window as any).signboardSettings, 'lvl3UScale', 1, 20).step(1).name('uScale').onChange(updateSignboard);
 
+		// --- Level 1 Grass Decals ---
+		const grassSettings = {
+			enabledLeft: true,
+			posXLeft: -5.5,
+			posYLeft: 0,
+			posZLeft: 12.5,
+			scaleLeft: 2.5,
+			enabledRight: true,
+			posXRight: 5.5,
+			posYRight: 0,
+			posZRight: 12.5,
+			scaleRight: 2.5
+		};
+		(window as any).grassSettings = grassSettings;
+
+		const grassLeftPlane = MeshBuilder.CreatePlane("grass_front_left", { size: 1 }, scene);
+		let leftPosData = grassLeftPlane.getVerticesData("position");
+		if (leftPosData) {
+			for (let i = 1; i < leftPosData.length; i += 3) {
+				leftPosData[i] += 0.5;
+			}
+			grassLeftPlane.setVerticesData("position", leftPosData);
+		}
+		grassLeftPlane.billboardMode = Mesh.BILLBOARDMODE_Y;
+		const grassLeftMat = new StandardMaterial("grassLeftMat", scene);
+		grassLeftMat.diffuseTexture = new Texture("/level_01_decals/grass_front_left_01.png", scene, true, true);
+		grassLeftMat.diffuseTexture.hasAlpha = true;
+		grassLeftMat.useAlphaFromDiffuseTexture = true;
+		grassLeftMat.specularColor = new Color3(0, 0, 0);
+		grassLeftMat.disableLighting = true;
+		grassLeftMat.emissiveColor = new Color3(1, 1, 1);
+		grassLeftPlane.material = grassLeftMat;
+
+		const grassRightPlane = MeshBuilder.CreatePlane("grass_front_right", { size: 1 }, scene);
+		let rightPosData = grassRightPlane.getVerticesData("position");
+		if (rightPosData) {
+			for (let i = 1; i < rightPosData.length; i += 3) {
+				rightPosData[i] += 0.5;
+			}
+			grassRightPlane.setVerticesData("position", rightPosData);
+		}
+		grassRightPlane.billboardMode = Mesh.BILLBOARDMODE_Y;
+		const grassRightMat = new StandardMaterial("grassRightMat", scene);
+		grassRightMat.diffuseTexture = new Texture("/level_01_decals/grass_front_right_01.png", scene, true, true);
+		grassRightMat.diffuseTexture.hasAlpha = true;
+		grassRightMat.useAlphaFromDiffuseTexture = true;
+		grassRightMat.specularColor = new Color3(0, 0, 0);
+		grassRightMat.disableLighting = true;
+		grassRightMat.emissiveColor = new Color3(1, 1, 1);
+		grassRightPlane.material = grassRightMat;
+
+		const updateGrass = () => {
+			const lvl = (window as any).gameManager?.level || 1;
+			if (lvl === 1 && grassSettings.enabledLeft) {
+				grassLeftPlane.isVisible = true;
+				grassLeftPlane.position.set(grassSettings.posXLeft, grassSettings.posYLeft, grassSettings.posZLeft);
+				grassLeftPlane.scaling.set(grassSettings.scaleLeft, grassSettings.scaleLeft, grassSettings.scaleLeft);
+			} else {
+				grassLeftPlane.isVisible = false;
+			}
+
+			if (lvl === 1 && grassSettings.enabledRight) {
+				grassRightPlane.isVisible = true;
+				grassRightPlane.position.set(grassSettings.posXRight, grassSettings.posYRight, grassSettings.posZRight);
+				grassRightPlane.scaling.set(grassSettings.scaleRight, grassSettings.scaleRight, grassSettings.scaleRight);
+			} else {
+				grassRightPlane.isVisible = false;
+			}
+		};
+		(window as any).updateGrass = updateGrass;
+
+		const grassFolder = gui.addFolder('Level 1 Grass Decals');
+		grassFolder.close();
+		const grassLeftFolder = grassFolder.addFolder('Grass Left');
+		grassLeftFolder.add(grassSettings, 'enabledLeft').name('Enabled').onChange(updateGrass);
+		grassLeftFolder.add(grassSettings, 'posXLeft', -30, 30).name('Pos X').onChange(updateGrass);
+		grassLeftFolder.add(grassSettings, 'posYLeft', -5, 10).name('Pos Y').onChange(updateGrass);
+		grassLeftFolder.add(grassSettings, 'posZLeft', 0, 50).name('Pos Z').onChange(updateGrass);
+		grassLeftFolder.add(grassSettings, 'scaleLeft', 0.1, 10).name('Scale').onChange(updateGrass);
+
+		const grassRightFolder = grassFolder.addFolder('Grass Right');
+		grassRightFolder.add(grassSettings, 'enabledRight').name('Enabled').onChange(updateGrass);
+		grassRightFolder.add(grassSettings, 'posXRight', -30, 30).name('Pos X').onChange(updateGrass);
+		grassRightFolder.add(grassSettings, 'posYRight', -5, 10).name('Pos Y').onChange(updateGrass);
+		grassRightFolder.add(grassSettings, 'posZRight', 0, 50).name('Pos Z').onChange(updateGrass);
+		grassRightFolder.add(grassSettings, 'scaleRight', 0.1, 10).name('Scale').onChange(updateGrass);
+		
+		updateGrass();
+
 		// --- Crowd Characters ---
 		const crowdSettings: any = {};
 		
@@ -2567,6 +2656,7 @@ void main(void) {
 						if ((window as any).updateSky) (window as any).updateSky();
 						if ((window as any).applyFieldLinesSettings) (window as any).applyFieldLinesSettings();
 						if ((window as any).updateBallTexture) (window as any).updateBallTexture();
+						if ((window as any).updateGrass) (window as any).updateGrass();
 					}
 				}}
 				onRetryLevel={() => {
@@ -2578,6 +2668,7 @@ void main(void) {
 						if ((window as any).updateSky) (window as any).updateSky();
 						if ((window as any).applyFieldLinesSettings) (window as any).applyFieldLinesSettings();
 						if ((window as any).updateBallTexture) (window as any).updateBallTexture();
+						if ((window as any).updateGrass) (window as any).updateGrass();
 					}
 				}}
 			/>
