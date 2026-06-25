@@ -298,19 +298,26 @@ export function GameUI({ onKickParamsUpdate, onKickExecute, phase, setPhase, lev
         {/* Level Badge */}
         <div className="absolute pointer-events-none" 
              style={{ opacity: uiConfig.levelOpacity, transform: `scale(${uiConfig.levelScale * sceneScale})`, transformOrigin: 'top left', top: `${uiConfig.levelTop * sceneScale}px`, left: `${uiConfig.levelLeft * sceneScale}px`, transition: 'all 0.2s' }}>
-          <div className="relative font-black text-4xl uppercase tracking-widest leading-none drop-shadow-md">
-            {/* Outline/Cloud Layer */}
-            <div className="absolute inset-0 pointer-events-none select-none"
-                 style={{
-                   WebkitTextStroke: `${uiConfig.levelOutlineWidth ?? 10}px ${uiConfig.levelOutlineColor ?? '#ffffff'}`,
-                   color: 'transparent'
-                 }}>
-              Level {level}
-            </div>
-            {/* Main Text Layer */}
-            <div className="relative pointer-events-none select-none" style={{ color: uiConfig.levelTextColor ?? '#000000' }}>
-              Level {level}
-            </div>
+          <div className="relative font-black text-4xl uppercase tracking-widest leading-none drop-shadow-md pointer-events-none select-none"
+               style={{ 
+                 color: uiConfig.levelTextColor ?? '#000000',
+                 textShadow: (() => {
+                   const width = uiConfig.levelOutlineWidth ?? 10;
+                   const color = uiConfig.levelOutlineColor ?? '#ffffff';
+                   if (width <= 0) return 'none';
+                   const shadows = [];
+                   for (let i = 0; i < 16; i++) {
+                     const angle = (i * 2 * Math.PI) / 16;
+                     shadows.push(`${(Math.cos(angle) * width).toFixed(2)}px ${(Math.sin(angle) * width).toFixed(2)}px 0 ${color}`);
+                   }
+                   for (let i = 0; i < 8; i++) {
+                     const angle = (i * 2 * Math.PI) / 8;
+                     shadows.push(`${(Math.cos(angle) * width * 0.5).toFixed(2)}px ${(Math.sin(angle) * width * 0.5).toFixed(2)}px 0 ${color}`);
+                   }
+                   return shadows.join(', ');
+                 })()
+               }}>
+            Level {level}
           </div>
         </div>
         
