@@ -717,6 +717,7 @@ export default function Home() {
 					if ((window as any).updateCrowd) (window as any).updateCrowd();
 					if ((window as any).updateClouds) (window as any).updateClouds();
 					if ((window as any).applyFieldLinesSettings) (window as any).applyFieldLinesSettings();
+					if ((window as any).updateGrass) (window as any).updateGrass();
 				}
 			},
 			jumpToLevel2: () => {
@@ -733,6 +734,7 @@ export default function Home() {
 					if ((window as any).updateCrowd) (window as any).updateCrowd();
 					if ((window as any).updateClouds) (window as any).updateClouds();
 					if ((window as any).applyFieldLinesSettings) (window as any).applyFieldLinesSettings();
+					if ((window as any).updateGrass) (window as any).updateGrass();
 				}
 			},
 			jumpToLevel3: () => {
@@ -748,6 +750,7 @@ export default function Home() {
 					if ((window as any).updateGkScale) (window as any).updateGkScale();
 					if ((window as any).updateCrowd) (window as any).updateCrowd();
 					if ((window as any).updateClouds) (window as any).updateClouds();
+					if ((window as any).updateGrass) (window as any).updateGrass();
 				}
 			}
 		};
