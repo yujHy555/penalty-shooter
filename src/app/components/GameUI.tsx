@@ -32,6 +32,7 @@ export function GameUI({ onKickParamsUpdate, onKickExecute, phase, setPhase, lev
   const [outcomeText, setOutcomeText] = useState<string | null>(null);
   const [uiConfig, setUiConfig] = useState<Record<string, any>>({
     levelScale: 1.0, levelOpacity: 1.0, levelTop: 16, levelLeft: 16,
+    levelTextColor: '#000000', levelOutlineColor: '#ffffff', levelOutlineWidth: 10,
     scoreScale: 1.0, scoreOpacity: 1.0, scoreTop: 16, scoreRight: 16,
     sbScale: 1.0, sbOpacity: 1.0, sbTop: 80, sbRight: 16,
     centerScale: 0.5, centerOpacity: 1.0, centerTop: 208,
@@ -297,8 +298,17 @@ export function GameUI({ onKickParamsUpdate, onKickExecute, phase, setPhase, lev
         {/* Level Badge */}
         <div className="absolute pointer-events-none" 
              style={{ opacity: uiConfig.levelOpacity, transform: `scale(${uiConfig.levelScale * sceneScale})`, transformOrigin: 'top left', top: `${uiConfig.levelTop * sceneScale}px`, left: `${uiConfig.levelLeft * sceneScale}px`, transition: 'all 0.2s' }}>
-          <div className="bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl p-1 shadow-lg shadow-orange-500/30">
-            <div className="bg-black text-white px-4 py-2 rounded-xl font-bold text-xl uppercase tracking-widest border border-white/10">
+          <div className="relative font-black text-4xl uppercase tracking-widest leading-none drop-shadow-md">
+            {/* Outline/Cloud Layer */}
+            <div className="absolute inset-0 pointer-events-none select-none"
+                 style={{
+                   WebkitTextStroke: `${uiConfig.levelOutlineWidth ?? 10}px ${uiConfig.levelOutlineColor ?? '#ffffff'}`,
+                   color: 'transparent'
+                 }}>
+              Level {level}
+            </div>
+            {/* Main Text Layer */}
+            <div className="relative pointer-events-none select-none" style={{ color: uiConfig.levelTextColor ?? '#000000' }}>
               Level {level}
             </div>
           </div>

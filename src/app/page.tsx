@@ -243,6 +243,7 @@ export default function Home() {
 
 		(window as any).uiSettings = {
 			levelScale: 1, levelOpacity: 1, levelTop: 16, levelLeft: 16,
+			levelTextColor: "#000000", levelOutlineColor: "#ffffff", levelOutlineWidth: 10,
 			sbScale: 1, sbOpacity: 1, sbTop: 80, sbRight: 16,
 			centerScale: 0.5, centerOpacity: 1.0, centerTop: 190,
 			
@@ -367,6 +368,9 @@ export default function Home() {
 		levelFolder.add((window as any).uiSettings, 'levelOpacity', 0.1, 1.0).step(0.05).name('Opacity').listen();
 		levelFolder.add((window as any).uiSettings, 'levelTop', -1000, 2000).step(1).name('Y Offset').listen();
 		levelFolder.add((window as any).uiSettings, 'levelLeft', -1000, 2000).step(1).name('X Offset').listen();
+		levelFolder.addColor((window as any).uiSettings, 'levelTextColor').name('Text Color').listen();
+		levelFolder.addColor((window as any).uiSettings, 'levelOutlineColor').name('Bg/Outline Color').listen();
+		levelFolder.add((window as any).uiSettings, 'levelOutlineWidth', 0, 20).step(1).name('Bg/Outline Width').listen();
 
 		const sbFolder = uiFolder.addFolder('Scoreboard (Shots)');
 		sbFolder.add((window as any).uiSettings, 'sbScale', 0.1, 3.0).step(0.05).name('Scale').listen();
