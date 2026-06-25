@@ -540,7 +540,7 @@ export function GameUI({ onKickParamsUpdate, onKickExecute, phase, setPhase, lev
 
       {/* Gauges Area */}
       {/* Retro Gauges Area */}
-      <div className={`absolute pointer-events-none transition-all duration-300 ${["ENDGAME", "LEVEL_COMPLETE", "LEVEL_FAILED", "IDLE", "KICKED"].includes(phase) ? "opacity-0 scale-90" : "opacity-100 scale-100"}`}
+      <div className={`absolute pointer-events-none transition-opacity duration-300 ${["ENDGAME", "LEVEL_COMPLETE", "LEVEL_FAILED", "IDLE", "KICKED"].includes(phase) ? "opacity-0" : "opacity-100"}`}
            style={{ 
              bottom: `${windowSize.h / 2 - (540 - uiConfig.dirBottom) * sceneScale}px`, 
              left: `${windowSize.w / 2 + uiConfig.gaugeX * sceneScale}px`, 
@@ -548,7 +548,8 @@ export function GameUI({ onKickParamsUpdate, onKickExecute, phase, setPhase, lev
              transformOrigin: 'bottom center' 
            }}>
         
-        <svg width="312" height="312" viewBox="0 0 200 200" className="drop-shadow-[0_0_10px_rgba(0,0,0,0.6)]">
+        <div className={!["ENDGAME", "LEVEL_COMPLETE", "LEVEL_FAILED", "IDLE", "KICKED"].includes(phase) ? "animate-wiggle-in" : ""}>
+          <svg width="312" height="312" viewBox="0 0 200 200" className="drop-shadow-[0_0_10px_rgba(0,0,0,0.6)]">
           <defs>
             {/* The signature retro gradient from the image: Green -> Orange -> Red */}
             <linearGradient id="gaugeGradient" x1="0" y1="163" x2="0" y2="37" gradientUnits="userSpaceOnUse">
@@ -601,7 +602,7 @@ export function GameUI({ onKickParamsUpdate, onKickExecute, phase, setPhase, lev
 
           </g>
         </svg>
-      </div>
+        </div>
       </div>
       <audio id="swishAudio" src="/sound_effects/net_swish_impact_01.mp3" preload="auto" />
       <audio id="boingAudio" src="/sound_effects/boing_impact_01.mp3" preload="auto" />
