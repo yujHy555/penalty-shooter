@@ -604,6 +604,7 @@ export function GameUI({ onKickParamsUpdate, onKickExecute, phase, setPhase, lev
         </svg>
         </div>
       </div>
+      </div>
       <audio id="swishAudio" src="/sound_effects/net_swish_impact_01.mp3" preload="auto" />
       <audio id="boingAudio" src="/sound_effects/boing_impact_01.mp3" preload="auto" />
         </>
