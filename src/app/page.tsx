@@ -718,6 +718,7 @@ export default function Home() {
 					if ((window as any).updateClouds) (window as any).updateClouds();
 					if ((window as any).applyFieldLinesSettings) (window as any).applyFieldLinesSettings();
 					if ((window as any).updateGrass) (window as any).updateGrass();
+					if ((window as any).updateStones) (window as any).updateStones();
 				}
 			},
 			jumpToLevel2: () => {
@@ -735,6 +736,7 @@ export default function Home() {
 					if ((window as any).updateClouds) (window as any).updateClouds();
 					if ((window as any).applyFieldLinesSettings) (window as any).applyFieldLinesSettings();
 					if ((window as any).updateGrass) (window as any).updateGrass();
+					if ((window as any).updateStones) (window as any).updateStones();
 				}
 			},
 			jumpToLevel3: () => {
@@ -751,6 +753,7 @@ export default function Home() {
 					if ((window as any).updateCrowd) (window as any).updateCrowd();
 					if ((window as any).updateClouds) (window as any).updateClouds();
 					if ((window as any).updateGrass) (window as any).updateGrass();
+					if ((window as any).updateStones) (window as any).updateStones();
 				}
 			}
 		};
@@ -1323,11 +1326,83 @@ export default function Home() {
 			slotFolder.add(grassSettings, `grass_${i}_tex`).name('Texture Path').onChange(updateGrass);
 			slotFolder.add(grassSettings, `grass_${i}_x`, -30, 30).name('Pos X').onChange(updateGrass);
 			slotFolder.add(grassSettings, `grass_${i}_y`, -5, 10).name('Pos Y').onChange(updateGrass);
-			slotFolder.add(grassSettings, `grass_${i}_z`, 0, 50).name('Pos Z').onChange(updateGrass);
+			slotFolder.add(grassSettings, `grass_${i}_z`, -50, 50).name('Pos Z').onChange(updateGrass);
 			slotFolder.add(grassSettings, `grass_${i}_scale`, 0.1, 10).name('Scale').onChange(updateGrass);
 		}
 		
 		updateGrass();
+
+		// --- Level 1 Stones ---
+		const stoneSettings: any = {};
+		for (let i = 0; i < 8; i++) {
+			stoneSettings[`stone_${i}_enabled`] = true;
+			stoneSettings[`stone_${i}_color`] = "#4b3621";
+			const isLeft = i < 4;
+			const sideOffset = isLeft ? -1.5 : 1.5;
+			const depthOffset = (i % 4) * 0.5;
+			stoneSettings[`stone_${i}_x`] = sideOffset + (Math.random() * 0.5 - 0.25);
+			stoneSettings[`stone_${i}_y`] = 0.01;
+			stoneSettings[`stone_${i}_z`] = 12.0 + depthOffset + (Math.random() * 0.5 - 0.25);
+			stoneSettings[`stone_${i}_scale`] = 0.15 + (Math.random() * 0.1);
+		}
+		(window as any).stoneSettings = stoneSettings;
+
+		const stoneMeshes: Mesh[] = [];
+		const stoneMaterials: StandardMaterial[] = [];
+
+		for (let i = 0; i < 8; i++) {
+			const disc = MeshBuilder.CreateDisc(`stone_slot_${i}`, { radius: 0.5 }, scene);
+			disc.rotation.x = Math.PI / 2;
+			
+			const mat = new StandardMaterial(`stoneMat_${i}`, scene);
+			mat.disableLighting = true;
+			mat.emissiveColor = Color3.FromHexString(stoneSettings[`stone_${i}_color`]);
+			disc.material = mat;
+			
+			stoneMeshes.push(disc);
+			stoneMaterials.push(mat);
+		}
+
+		const updateStones = () => {
+			const lvl = (window as any).gameManager?.level || 1;
+			for (let i = 0; i < 8; i++) {
+				const mesh = stoneMeshes[i];
+				const mat = stoneMaterials[i];
+				const enabled = stoneSettings[`stone_${i}_enabled`];
+				const colorHex = stoneSettings[`stone_${i}_color`];
+				const x = stoneSettings[`stone_${i}_x`];
+				const y = stoneSettings[`stone_${i}_y`];
+				const z = stoneSettings[`stone_${i}_z`];
+				const scale = stoneSettings[`stone_${i}_scale`];
+
+				if (lvl === 1 && enabled) {
+					mesh.isVisible = true;
+					mesh.position.set(x, y, z);
+					mesh.scaling.set(scale, scale, scale);
+					
+					mat.emissiveColor = Color3.FromHexString(colorHex);
+				} else {
+					mesh.isVisible = false;
+				}
+			}
+		};
+		(window as any).updateStones = updateStones;
+
+		const stoneFolder = gui.addFolder('Level 1 Stones');
+		stoneFolder.close();
+		
+		for (let i = 0; i < 8; i++) {
+			const slotFolder = stoneFolder.addFolder(`Slot ${i + 1}`);
+			slotFolder.close();
+			slotFolder.add(stoneSettings, `stone_${i}_enabled`).name('Enabled').onChange(updateStones);
+			slotFolder.addColor(stoneSettings, `stone_${i}_color`).name('Color').onChange(updateStones);
+			slotFolder.add(stoneSettings, `stone_${i}_x`, -30, 30).name('Pos X').onChange(updateStones);
+			slotFolder.add(stoneSettings, `stone_${i}_y`, 0, 1).name('Pos Y').onChange(updateStones);
+			slotFolder.add(stoneSettings, `stone_${i}_z`, -50, 50).name('Pos Z').onChange(updateStones);
+			slotFolder.add(stoneSettings, `stone_${i}_scale`, 0.01, 5).name('Scale').onChange(updateStones);
+		}
+		
+		updateStones();
 
 		// --- Crowd Characters ---
 		const crowdSettings: any = {};
@@ -2662,6 +2737,7 @@ void main(void) {
 						if ((window as any).applyFieldLinesSettings) (window as any).applyFieldLinesSettings();
 						if ((window as any).updateBallTexture) (window as any).updateBallTexture();
 						if ((window as any).updateGrass) (window as any).updateGrass();
+						if ((window as any).updateStones) (window as any).updateStones();
 					}
 				}}
 				onRetryLevel={() => {
@@ -2674,6 +2750,7 @@ void main(void) {
 						if ((window as any).applyFieldLinesSettings) (window as any).applyFieldLinesSettings();
 						if ((window as any).updateBallTexture) (window as any).updateBallTexture();
 						if ((window as any).updateGrass) (window as any).updateGrass();
+						if ((window as any).updateStones) (window as any).updateStones();
 					}
 				}}
 			/>
