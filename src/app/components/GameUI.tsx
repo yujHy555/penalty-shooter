@@ -22,9 +22,10 @@ interface GameUIProps {
   isLoading?: boolean;
   onAdvanceLevel?: () => void;
   onRetryLevel?: () => void;
+  onResetGame?: () => void;
 }
 
-export function GameUI({ onKickParamsUpdate, onKickExecute, phase, setPhase, level, score, shots = [null, null, null, null, null], isLoading = false, onAdvanceLevel, onRetryLevel }: GameUIProps) {
+export function GameUI({ onKickParamsUpdate, onKickExecute, phase, setPhase, level, score, shots = [null, null, null, null, null], isLoading = false, onAdvanceLevel, onRetryLevel, onResetGame }: GameUIProps) {
   const [direction, setDirection] = useState(0);
   const [power, setPower] = useState(0);
   const [height, setHeight] = useState(0);
@@ -444,7 +445,9 @@ export function GameUI({ onKickParamsUpdate, onKickExecute, phase, setPhase, lev
                   style={{ backgroundColor: uiConfig.endBtnBgColor, color: uiConfig.endBtnColor, backgroundImage: 'none' }}
                   onClick={(e) => {
                     e.stopPropagation();
-                    if ((window as any).gameManager) {
+                    if (onResetGame) {
+                      onResetGame();
+                    } else if ((window as any).gameManager) {
                       (window as any).gameManager.resetGame();
                     }
                   }}

@@ -2774,6 +2774,19 @@ void main(void) {
 						if ((window as any).updateStones) (window as any).updateStones();
 					}
 				}}
+				onResetGame={() => {
+					if (gameManagerRef) {
+						gameManagerRef.resetGame();
+						if ((window as any).updateLawn) (window as any).updateLawn();
+						if ((window as any).updateSignboard) (window as any).updateSignboard();
+						if ((window as any).updateCrowd) (window as any).updateCrowd();
+						if ((window as any).updateSky) (window as any).updateSky();
+						if ((window as any).applyFieldLinesSettings) (window as any).applyFieldLinesSettings();
+						if ((window as any).updateBallTexture) (window as any).updateBallTexture();
+						if ((window as any).updateGrass) (window as any).updateGrass();
+						if ((window as any).updateStones) (window as any).updateStones();
+					}
+				}}
 			/>
 			<canvas
 				ref={canvasRef}
