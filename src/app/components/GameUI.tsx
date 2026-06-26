@@ -316,26 +316,52 @@ export function GameUI({ onKickParamsUpdate, onKickExecute, phase, setPhase, lev
         </div>
         
         {/* Scoreboard (Shots) */}
-        <div className="absolute pointer-events-none flex items-center space-x-2 bg-black/50 p-3 rounded-2xl border border-white/10 backdrop-blur-sm" 
-             style={{ opacity: uiConfig.sbOpacity, transform: `scale(${uiConfig.sbScale * sceneScale})`, transformOrigin: 'top right', top: `${uiConfig.sbTop * sceneScale}px`, right: `${uiConfig.sbRight * sceneScale}px`, transition: 'all 0.2s' }}>
-          <div className="flex space-x-2">
-            {shots?.map((shot, idx) => (
-              <div 
-                key={idx} 
-                className={`w-8 h-8 rounded-md flex items-center justify-center font-bold text-lg shadow-inner ${
-                  shot === "GOAL!" ? "bg-green-500 text-white shadow-green-500/50" : 
-                  (shot === "MISS!" || shot === "SAVE!") ? "bg-red-500 text-white shadow-red-500/50" : 
-                  "bg-white/10 text-white/40"
-                }`}
-              >
-                {shot === "GOAL!" && "⚽"}
-                {(shot === "MISS!" || shot === "SAVE!") && "❌"}
-                {!shot && (idx + 1)}
-              </div>
-            ))}
-          </div>
-          <div className="text-white font-black text-xl">
-            {shots?.filter(s => s === "GOAL!").length} / 5
+        <div className="absolute pointer-events-none flex items-center justify-center" 
+             style={{ 
+               opacity: uiConfig.sbOpacity, 
+               transform: `scale(${uiConfig.sbScale * sceneScale})`, 
+               transformOrigin: 'top right', 
+               top: `${uiConfig.sbTop * sceneScale}px`, 
+               right: `${uiConfig.sbRight * sceneScale}px`, 
+               width: `${uiConfig.sbBgWidth ?? 220}px`,
+               height: `${uiConfig.sbBgHeight ?? 60}px`,
+               transition: 'all 0.2s' 
+             }}>
+          <img src="/scoreboard_background/score_back_01.png" alt="Scoreboard" className="absolute inset-0 w-full h-full object-fill select-none" draggable="false" />
+          
+          <div className="relative z-10 flex items-center" 
+               style={{ 
+                 transform: `scale(${uiConfig.sbElementsScale ?? 1}) translate(${uiConfig.sbElementsX ?? 0}px, ${uiConfig.sbElementsY ?? 0}px)`,
+                 gap: `${uiConfig.sbSquareGap ?? 8}px`
+               }}>
+            <div className="flex" style={{ gap: `${uiConfig.sbSquareGap ?? 8}px` }}>
+              {shots?.map((shot, idx) => (
+                <div 
+                  key={idx} 
+                  className={`flex items-center justify-center font-bold text-lg shadow-inner ${
+                    shot === "GOAL!" ? "bg-green-500 shadow-green-500/50" : 
+                    (shot === "MISS!" || shot === "SAVE!") ? "bg-red-500 shadow-red-500/50" : 
+                    "bg-white/10 text-white/40"
+                  }`}
+                  style={{
+                    width: `${uiConfig.sbSquareSize ?? 32}px`,
+                    height: `${uiConfig.sbSquareSize ?? 32}px`,
+                    borderRadius: '0.375rem' // rounded-md
+                  }}
+                >
+                  {/* Icons Removed! Empty state just shows the number */}
+                  {!shot && (idx + 1)}
+                </div>
+              ))}
+            </div>
+            <div className="text-white font-black" 
+                 style={{ 
+                   transform: `scale(${uiConfig.sbTextScale ?? 1}) translate(${uiConfig.sbTextX ?? 0}px, ${uiConfig.sbTextY ?? 0}px)`,
+                   fontSize: '1.25rem', // text-xl equivalent
+                   lineHeight: 1
+                 }}>
+              {shots?.filter(s => s === "GOAL!").length} / 5
+            </div>
           </div>
         </div>
 

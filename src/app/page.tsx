@@ -244,7 +244,7 @@ export default function Home() {
 		(window as any).uiSettings = {
 			levelScale: 1, levelOpacity: 1, levelTop: 16, levelLeft: 16,
 			levelTextColor: "#000000", levelOutlineColor: "#ffffff", levelOutlineWidth: 10,
-			sbScale: 1, sbOpacity: 1, sbTop: 80, sbRight: 16,
+			sbScale: 1, sbOpacity: 1, sbTop: 80, sbRight: 16, sbBgWidth: 220, sbBgHeight: 60, sbElementsX: 0, sbElementsY: 0, sbElementsScale: 1, sbSquareSize: 32, sbSquareGap: 8, sbTextX: 0, sbTextY: 0, sbTextScale: 1,
 			centerScale: 0.5, centerOpacity: 1.0, centerTop: 190,
 			
 			// Decoupled Instructions
@@ -390,10 +390,25 @@ export default function Home() {
 		menuFolder.add((window as any).menuSettings, 'playBtnMaxWidth', 200, 1000).step(10).name('Play Btn Max Width (px)');
 
 		const sbFolder = uiFolder.addFolder('Scoreboard (Shots)');
-		sbFolder.add((window as any).uiSettings, 'sbScale', 0.1, 3.0).step(0.05).name('Scale').listen();
-		sbFolder.add((window as any).uiSettings, 'sbOpacity', 0.1, 1.0).step(0.05).name('Opacity').listen();
-		sbFolder.add((window as any).uiSettings, 'sbTop', -1000, 2000).step(1).name('Y Offset').listen();
-		sbFolder.add((window as any).uiSettings, 'sbRight', -1000, 2000).step(1).name('X Offset').listen();
+		sbFolder.add((window as any).uiSettings, 'sbScale', 0.1, 3.0).step(0.05).name('Global Scale').listen();
+		sbFolder.add((window as any).uiSettings, 'sbOpacity', 0.1, 1.0).step(0.05).name('Global Opacity').listen();
+		sbFolder.add((window as any).uiSettings, 'sbTop', -1000, 2000).step(1).name('Global Y Offset').listen();
+		sbFolder.add((window as any).uiSettings, 'sbRight', -1000, 2000).step(1).name('Global X Offset').listen();
+		
+		const sbBgFolder = sbFolder.addFolder('Background Image');
+		sbBgFolder.add((window as any).uiSettings, 'sbBgWidth', 50, 1000).step(1).name('Width (px)').listen();
+		sbBgFolder.add((window as any).uiSettings, 'sbBgHeight', 20, 500).step(1).name('Height (px)').listen();
+
+		const sbElemsFolder = sbFolder.addFolder('Inner Elements');
+		sbElemsFolder.add((window as any).uiSettings, 'sbElementsScale', 0.1, 3.0).step(0.05).name('Group Scale').listen();
+		sbElemsFolder.add((window as any).uiSettings, 'sbElementsX', -500, 500).step(1).name('Group X Offset').listen();
+		sbElemsFolder.add((window as any).uiSettings, 'sbElementsY', -500, 500).step(1).name('Group Y Offset').listen();
+		sbElemsFolder.add((window as any).uiSettings, 'sbSquareSize', 10, 100).step(1).name('Square Size (px)').listen();
+		sbElemsFolder.add((window as any).uiSettings, 'sbSquareGap', 0, 50).step(1).name('Gap between squares').listen();
+		
+		sbElemsFolder.add((window as any).uiSettings, 'sbTextScale', 0.1, 3.0).step(0.05).name('Text Scale').listen();
+		sbElemsFolder.add((window as any).uiSettings, 'sbTextX', -200, 200).step(1).name('Text X Offset').listen();
+		sbElemsFolder.add((window as any).uiSettings, 'sbTextY', -200, 200).step(1).name('Text Y Offset').listen();
 
 		const centerFolder = uiFolder.addFolder('Center Instruction Text');
 		centerFolder.add((window as any).uiSettings, 'centerScale', 0.1, 5.0).step(0.05).name('Scale').listen();
