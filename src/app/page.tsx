@@ -124,6 +124,7 @@ export default function Home() {
 							if ((window as any).updateSky) (window as any).updateSky();
 							if ((window as any).updateBallTexture) (window as any).updateBallTexture();
 							if ((window as any).updateNet) (window as any).updateNet();
+							if ((window as any).applyFieldLinesSettings) (window as any).applyFieldLinesSettings();
 						}
 						return newLevel;
 					});
@@ -810,6 +811,7 @@ export default function Home() {
 					if ((window as any).updateGkScale) (window as any).updateGkScale();
 					if ((window as any).updateCrowd) (window as any).updateCrowd();
 					if ((window as any).updateClouds) (window as any).updateClouds();
+					if ((window as any).applyFieldLinesSettings) (window as any).applyFieldLinesSettings();
 					if ((window as any).updateGrass) (window as any).updateGrass();
 					if ((window as any).updateStones) (window as any).updateStones();
 				}
