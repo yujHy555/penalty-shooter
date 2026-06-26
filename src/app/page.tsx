@@ -244,7 +244,7 @@ export default function Home() {
 		(window as any).uiSettings = {
 			levelScale: 1, levelOpacity: 1, levelTop: 16, levelLeft: 16,
 			levelTextColor: "#000000", levelOutlineColor: "#ffffff", levelOutlineWidth: 10,
-			sbScale: 1, sbOpacity: 1, sbTop: 80, sbRight: 16, sbBgWidth: 220, sbBgHeight: 60, sbElementsX: 0, sbElementsY: 0, sbElementsScale: 1, sbSquareSize: 32, sbSquareGap: 8, sbTextX: 0, sbTextY: 0, sbTextScale: 1,
+			sbScale: 1, sbOpacity: 1, sbTop: 80, sbRight: 16, sbBgWidth: 220, sbBgHeight: 60, sbBgScale: 1, sbElementsX: 0, sbElementsY: 0, sbElementsScale: 1, sbSquareSize: 32, sbSquareGap: 8, sbTextX: 0, sbTextY: 0, sbTextScale: 1, sbTextColor: "#ffffff",
 			centerScale: 0.5, centerOpacity: 1.0, centerTop: 190,
 			
 			// Decoupled Instructions
@@ -396,6 +396,7 @@ export default function Home() {
 		sbFolder.add((window as any).uiSettings, 'sbRight', -1000, 2000).step(1).name('Global X Offset').listen();
 		
 		const sbBgFolder = sbFolder.addFolder('Background Image');
+		sbBgFolder.add((window as any).uiSettings, 'sbBgScale', 0.1, 5.0).step(0.05).name('Combined Scale').listen();
 		sbBgFolder.add((window as any).uiSettings, 'sbBgWidth', 50, 1000).step(1).name('Width (px)').listen();
 		sbBgFolder.add((window as any).uiSettings, 'sbBgHeight', 20, 500).step(1).name('Height (px)').listen();
 
@@ -409,6 +410,7 @@ export default function Home() {
 		sbElemsFolder.add((window as any).uiSettings, 'sbTextScale', 0.1, 3.0).step(0.05).name('Text Scale').listen();
 		sbElemsFolder.add((window as any).uiSettings, 'sbTextX', -200, 200).step(1).name('Text X Offset').listen();
 		sbElemsFolder.add((window as any).uiSettings, 'sbTextY', -200, 200).step(1).name('Text Y Offset').listen();
+		sbElemsFolder.addColor((window as any).uiSettings, 'sbTextColor').name('Text Color').listen();
 
 		const centerFolder = uiFolder.addFolder('Center Instruction Text');
 		centerFolder.add((window as any).uiSettings, 'centerScale', 0.1, 5.0).step(0.05).name('Scale').listen();

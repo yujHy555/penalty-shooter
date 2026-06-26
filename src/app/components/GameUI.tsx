@@ -323,8 +323,8 @@ export function GameUI({ onKickParamsUpdate, onKickExecute, phase, setPhase, lev
                transformOrigin: 'top right', 
                top: `${uiConfig.sbTop * sceneScale}px`, 
                right: `${uiConfig.sbRight * sceneScale}px`, 
-               width: `${uiConfig.sbBgWidth ?? 220}px`,
-               height: `${uiConfig.sbBgHeight ?? 60}px`,
+               width: `${(uiConfig.sbBgWidth ?? 220) * (uiConfig.sbBgScale ?? 1)}px`,
+               height: `${(uiConfig.sbBgHeight ?? 60) * (uiConfig.sbBgScale ?? 1)}px`,
                transition: 'all 0.2s' 
              }}>
           <img src="/scoreboard_background/score_back_01.png" alt="Scoreboard" className="absolute inset-0 w-full h-full object-fill select-none" draggable="false" />
@@ -354,11 +354,12 @@ export function GameUI({ onKickParamsUpdate, onKickExecute, phase, setPhase, lev
                 </div>
               ))}
             </div>
-            <div className="text-white font-black" 
+            <div className="font-black" 
                  style={{ 
                    transform: `scale(${uiConfig.sbTextScale ?? 1}) translate(${uiConfig.sbTextX ?? 0}px, ${uiConfig.sbTextY ?? 0}px)`,
                    fontSize: '1.25rem', // text-xl equivalent
-                   lineHeight: 1
+                   lineHeight: 1,
+                   color: uiConfig.sbTextColor ?? "#ffffff"
                  }}>
               {shots?.filter(s => s === "GOAL!").length} / 5
             </div>
