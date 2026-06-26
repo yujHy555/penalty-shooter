@@ -293,6 +293,15 @@ export default function Home() {
 			failBtnScale: 1, failBtnY: 0, failBtnColor: "#ffffff", failBtnBgColor: "#22c55e",
 		};
 
+		(window as any).menuSettings = {
+			bgDarken: 0.1,
+			bgObjectPosition: "center",
+			playBtnBottom: 12,
+			playBtnWidth: 30,
+			playBtnMinWidth: 150,
+			playBtnMaxWidth: 400
+		};
+
 		(window as any).audioSettings = { kickVolume: 0.6, netSwishVolume: 1.0, boingVolume: 1.0 };
 		const audioFolder = gui.addFolder('Audio Settings');
 		audioFolder.add((window as any).audioSettings, 'kickVolume', 0.0, 1.0).step(0.1).name('Kick Volume').listen();
@@ -371,6 +380,14 @@ export default function Home() {
 		levelFolder.addColor((window as any).uiSettings, 'levelTextColor').name('Text Color').listen();
 		levelFolder.addColor((window as any).uiSettings, 'levelOutlineColor').name('Bg/Outline Color').listen();
 		levelFolder.add((window as any).uiSettings, 'levelOutlineWidth', 0, 20).step(1).name('Bg/Outline Width').listen();
+
+		const menuFolder = uiFolder.addFolder('Main Menu');
+		menuFolder.add((window as any).menuSettings, 'bgDarken', 0, 1).step(0.05).name('BG Darken Overlay');
+		menuFolder.add((window as any).menuSettings, 'bgObjectPosition').name('BG Object Position');
+		menuFolder.add((window as any).menuSettings, 'playBtnBottom', 0, 100).step(1).name('Play Btn Bottom (%)');
+		menuFolder.add((window as any).menuSettings, 'playBtnWidth', 10, 100).step(1).name('Play Btn Width (vmin)');
+		menuFolder.add((window as any).menuSettings, 'playBtnMinWidth', 50, 300).step(10).name('Play Btn Min Width (px)');
+		menuFolder.add((window as any).menuSettings, 'playBtnMaxWidth', 200, 1000).step(10).name('Play Btn Max Width (px)');
 
 		const sbFolder = uiFolder.addFolder('Scoreboard (Shots)');
 		sbFolder.add((window as any).uiSettings, 'sbScale', 0.1, 3.0).step(0.05).name('Scale').listen();
