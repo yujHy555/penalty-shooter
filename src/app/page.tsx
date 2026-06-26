@@ -125,6 +125,7 @@ export default function Home() {
 							if ((window as any).updateBallTexture) (window as any).updateBallTexture();
 							if ((window as any).updateNet) (window as any).updateNet();
 							if ((window as any).applyFieldLinesSettings) (window as any).applyFieldLinesSettings();
+							if ((window as any).updateGrandstand) (window as any).updateGrandstand();
 						}
 						return newLevel;
 					});
@@ -778,6 +779,7 @@ export default function Home() {
 					if ((window as any).applyFieldLinesSettings) (window as any).applyFieldLinesSettings();
 					if ((window as any).updateGrass) (window as any).updateGrass();
 					if ((window as any).updateStones) (window as any).updateStones();
+					if ((window as any).updateGrandstand) (window as any).updateGrandstand();
 				}
 			},
 			jumpToLevel2: () => {
@@ -796,6 +798,7 @@ export default function Home() {
 					if ((window as any).applyFieldLinesSettings) (window as any).applyFieldLinesSettings();
 					if ((window as any).updateGrass) (window as any).updateGrass();
 					if ((window as any).updateStones) (window as any).updateStones();
+					if ((window as any).updateGrandstand) (window as any).updateGrandstand();
 				}
 			},
 			jumpToLevel3: () => {
@@ -814,6 +817,7 @@ export default function Home() {
 					if ((window as any).applyFieldLinesSettings) (window as any).applyFieldLinesSettings();
 					if ((window as any).updateGrass) (window as any).updateGrass();
 					if ((window as any).updateStones) (window as any).updateStones();
+					if ((window as any).updateGrandstand) (window as any).updateGrandstand();
 				}
 			}
 		};
@@ -1300,6 +1304,47 @@ export default function Home() {
 		sbLvl3.add((window as any).signboardSettings, 'lvl3PosZ', 10, 30).name('Pos Z').onChange(updateSignboard);
 		sbLvl3.add((window as any).signboardSettings, 'lvl3PosY', -2, 10).name('Pos Y').onChange(updateSignboard);
 		sbLvl3.add((window as any).signboardSettings, 'lvl3UScale', 1, 20).step(1).name('uScale').onChange(updateSignboard);
+
+		// --- Level 2 Grandstand ---
+		const grandstandMat = new StandardMaterial("grandstandMat", scene);
+		grandstandMat.emissiveColor = Color3.FromHexString("#444444");
+		grandstandMat.disableLighting = true;
+
+		const grandstand = MeshBuilder.CreateBox("grandstand", { width: 100, height: 10, depth: 1 }, scene);
+		grandstand.material = grandstandMat;
+		
+		(window as any).grandstandSettings = {
+			enabled: true,
+			color: "#444444",
+			width: 100, height: 10, depth: 1,
+			posX: 0, posY: 5, posZ: 25
+		};
+
+		const updateGrandstand = () => {
+			const level = (window as any).gameManager?.level || 1;
+			const st = (window as any).grandstandSettings;
+			
+			if (level === 2 && st.enabled) {
+				grandstand.isVisible = true;
+				grandstand.scaling.set(st.width / 100, st.height / 10, st.depth / 1);
+				grandstand.position.set(st.posX, st.posY, st.posZ);
+				grandstandMat.emissiveColor = Color3.FromHexString(st.color);
+			} else {
+				grandstand.isVisible = false;
+			}
+		};
+		(window as any).updateGrandstand = updateGrandstand;
+		updateGrandstand();
+
+		const gsFolder = gui.addFolder('Level 2 Grandstand');
+		gsFolder.add((window as any).grandstandSettings, 'enabled').name('Enabled').onChange(updateGrandstand);
+		gsFolder.addColor((window as any).grandstandSettings, 'color').name('Color').onChange(updateGrandstand);
+		gsFolder.add((window as any).grandstandSettings, 'width', 10, 300).name('Width').onChange(updateGrandstand);
+		gsFolder.add((window as any).grandstandSettings, 'height', 1, 50).name('Height').onChange(updateGrandstand);
+		gsFolder.add((window as any).grandstandSettings, 'depth', 0.1, 20).name('Depth').onChange(updateGrandstand);
+		gsFolder.add((window as any).grandstandSettings, 'posX', -50, 50).name('Pos X').onChange(updateGrandstand);
+		gsFolder.add((window as any).grandstandSettings, 'posY', -10, 30).name('Pos Y').onChange(updateGrandstand);
+		gsFolder.add((window as any).grandstandSettings, 'posZ', 10, 100).name('Pos Z').onChange(updateGrandstand);
 
 		// --- Level 1 Grass Decals ---
 		const grassSettings: any = {};
