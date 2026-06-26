@@ -132,6 +132,10 @@ export default function Home() {
 				};
 			}
 			setIsLoading(false);
+		}).catch((err) => {
+			alert("Error loading scene: " + err.message + "\n" + (err.stack || ""));
+			console.error("handleLoad error:", err);
+			setIsLoading(false); // Let it finish loading state so they can see if UI rendered
 		});
 
 		let resizeTimeout: NodeJS.Timeout;
