@@ -418,9 +418,13 @@ export function GameUI({ onKickParamsUpdate, onKickExecute, phase, setPhase, lev
           <div className="flex justify-center pointer-events-none absolute w-full left-0"
                style={{ top: `${windowSize.h / 2 - (540 - uiConfig.outcomeTop) * sceneScale}px`, opacity: uiConfig.outcomeOpacity, transition: 'all 0.2s' }}>
             <div style={{ transform: `scale(${uiConfig.outcomeScale * sceneScale})`, transformOrigin: 'top center' }}>
-              <h1 className={`text-8xl font-black drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)] ${outcomeText === "GOAL!" ? "text-green-400" : outcomeText === "SAVE!" ? "text-red-400" : "text-yellow-400"} animate-pop-fade`}>
-                {outcomeText}
-              </h1>
+              <img 
+                src={outcomeText === "GOAL!" ? "/outcome_images/goal.png" : outcomeText === "SAVE!" ? "/outcome_images/saved.png" : "/outcome_images/missed.png"} 
+                alt={outcomeText} 
+                className="h-auto object-contain animate-pop-fade drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)]" 
+                style={{ width: `${uiConfig.outcomeImageWidth ?? 400}px` }} 
+                draggable="false"
+              />
             </div>
           </div>
         )}

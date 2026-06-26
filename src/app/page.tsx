@@ -254,7 +254,7 @@ export default function Home() {
 			heightTextScale: 0.5, heightTextTop: 190, heightTextLeft: 0, heightTextColor: "#ffffff", heightTextBgColor: "#000000", heightTextBgOpacity: 0.3,
 			curveTextScale: 0.5, curveTextTop: 190, curveTextLeft: 0, curveTextColor: "#ffffff", curveTextBgColor: "#000000", curveTextBgOpacity: 0.3,
 			
-			outcomeScale: 1, outcomeOpacity: 1.0, outcomeTop: 120,
+			outcomeScale: 1, outcomeOpacity: 1.0, outcomeTop: 120, outcomeImageWidth: 400,
 			dirScale: 1.0, dirOpacity: 1.0, dirBottom: 256,
 			gaugeScale: 1.1, gaugeX: 0,
 			pwrScale: 1, pwrX: 0, pwrY: 0,
@@ -279,9 +279,9 @@ export default function Home() {
 			preloaderTitleScale: 1, preloaderTitleTop: 0,
 			preloaderSubScale: 1, preloaderSubTop: 0,
 			endBgOpacity: 0.8,
-			endTitleScale: 1, endTitleY: 0, endTitleColor: "#ffffff",
+			endTitleScale: 1, endTitleY: -40, endTitleColor: "#ffffff",
 			endSubScale: 1, endSubY: 0, endSubColor: "#ffffff",
-			endBtnScale: 1, endBtnY: 0, endBtnColor: "#ffffff", endBtnBgColor: "#22c55e",
+			endBtnScale: 1, endBtnY: 40, endBtnColor: "#000000", endBtnBgColor: "#22c55e",
 			compBgOpacity: 0.6,
 			compTitleScale: 1, compTitleY: 0, compTitleColor: "#facc15",
 			compSubScale: 1, compSubY: 0, compSubColor: "#ffffff",
@@ -442,16 +442,15 @@ export default function Home() {
 		crvTextF.addColor((window as any).uiSettings, 'curveTextBgColor').name('Bg Color').listen();
 		crvTextF.add((window as any).uiSettings, 'curveTextBgOpacity', 0, 1.0).step(0.05).name('Bg Opacity').listen();
 
-		const outcomeFolder = uiFolder.addFolder('Outcome Text');
-		outcomeFolder.add((window as any).uiSettings, 'outcomeScale', 0.1, 10.0).step(0.05).name('Scale').listen();
+		const outcomeFolder = uiFolder.addFolder('Outcome Images (GOAL/MISS/SAVE)');
+		outcomeFolder.add((window as any).uiSettings, 'outcomeScale', 0.1, 5.0).step(0.05).name('Scale').listen();
 		outcomeFolder.add((window as any).uiSettings, 'outcomeOpacity', 0.1, 1.0).step(0.05).name('Opacity').listen();
-		outcomeFolder.add((window as any).uiSettings, 'outcomeTop', -5000, 5000).step(1).name('Y Offset').listen();
+		outcomeFolder.add((window as any).uiSettings, 'outcomeTop', -1000, 1000).step(1).name('Y Offset').listen();
+		outcomeFolder.add((window as any).uiSettings, 'outcomeImageWidth', 50, 1000).step(10).name('Image Base Width (px)').listen();
 
 		const dirFolder = uiFolder.addFolder('Direction / Text Overlays');
 		dirFolder.add((window as any).uiSettings, 'centerScale', 0.1, 3.0).step(0.1).name('Center Text Scale').listen();
 		dirFolder.add((window as any).uiSettings, 'centerTop', 0, 500).step(1).name('Center Text Y Offset').listen();
-		dirFolder.add((window as any).uiSettings, 'outcomeScale', 0.1, 5.0).step(0.1).name('Outcome Text Scale').listen();
-		dirFolder.add((window as any).uiSettings, 'outcomeTop', 0, 500).step(1).name('Outcome Text Y Offset').listen();
 
 		const retroFolder = uiFolder.addFolder('Retro Gauges Config');
 		retroFolder.add((window as any).uiSettings, 'dirBottom', 0, 500).step(1).name('Global Y Position').listen();
