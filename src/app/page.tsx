@@ -1508,12 +1508,29 @@ export default function Home() {
 							mesh.position.y = baseY;
 						}
 						mesh.position.z = z;
-						mesh.scaling.set(scale, scale, scale);
+						
+						const applyScale = (t: Texture) => {
+							if (t.getSize) {
+								const size = t.getSize();
+								const aspect = (size.width && size.height) ? size.width / size.height : 1;
+								mesh.scaling.set(scale * aspect, scale, scale);
+							} else {
+								mesh.scaling.set(scale, scale, scale);
+							}
+						};
+
 						// Update texture if changed
 						if ((mat.diffuseTexture as Texture)?.name !== tex) {
 							const newTex = new Texture(tex, scene, true, true);
 							newTex.hasAlpha = true;
 							mat.diffuseTexture = newTex;
+							newTex.onLoadObservable.addOnce(() => applyScale(newTex));
+						} else if (mat.diffuseTexture && (mat.diffuseTexture as Texture).isReady()) {
+							applyScale(mat.diffuseTexture as Texture);
+						} else if (mat.diffuseTexture) {
+							(mat.diffuseTexture as Texture).onLoadObservable.addOnce(() => applyScale(mat.diffuseTexture as Texture));
+						} else {
+							mesh.scaling.set(scale, scale, scale);
 						}
 					} else {
 						mesh.isVisible = false;
