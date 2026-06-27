@@ -26,7 +26,7 @@ export const MainMenu: React.FC<MainMenuProps> = ({ onPlay }) => {
         <img 
           src="/main_menu/main_menu_background_01.png" 
           alt="Main Menu Background" 
-          className="absolute inset-0 w-full h-full object-cover select-none pointer-events-none"
+          className="absolute inset-0 w-full h-full select-none pointer-events-none"
           style={{
             objectPosition: menuConfig.bgObjectPosition || 'center'
           }}
