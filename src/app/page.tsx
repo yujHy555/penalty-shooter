@@ -126,6 +126,7 @@ export default function Home() {
 							if ((window as any).updateNet) (window as any).updateNet();
 							if ((window as any).applyFieldLinesSettings) (window as any).applyFieldLinesSettings();
 							if ((window as any).updateGrandstand) (window as any).updateGrandstand();
+							if ((window as any).updateStairs) (window as any).updateStairs();
 						}
 						return newLevel;
 					});
@@ -780,6 +781,7 @@ export default function Home() {
 					if ((window as any).updateGrass) (window as any).updateGrass();
 					if ((window as any).updateStones) (window as any).updateStones();
 					if ((window as any).updateGrandstand) (window as any).updateGrandstand();
+					if ((window as any).updateStairs) (window as any).updateStairs();
 				}
 			},
 			jumpToLevel2: () => {
@@ -799,6 +801,7 @@ export default function Home() {
 					if ((window as any).updateGrass) (window as any).updateGrass();
 					if ((window as any).updateStones) (window as any).updateStones();
 					if ((window as any).updateGrandstand) (window as any).updateGrandstand();
+					if ((window as any).updateStairs) (window as any).updateStairs();
 				}
 			},
 			jumpToLevel3: () => {
@@ -818,6 +821,7 @@ export default function Home() {
 					if ((window as any).updateGrass) (window as any).updateGrass();
 					if ((window as any).updateStones) (window as any).updateStones();
 					if ((window as any).updateGrandstand) (window as any).updateGrandstand();
+					if ((window as any).updateStairs) (window as any).updateStairs();
 				}
 			}
 		};
@@ -1345,6 +1349,63 @@ export default function Home() {
 		gsFolder.add((window as any).grandstandSettings, 'posX', -50, 50).name('Pos X').onChange(updateGrandstand);
 		gsFolder.add((window as any).grandstandSettings, 'posY', -10, 30).name('Pos Y').onChange(updateGrandstand);
 		gsFolder.add((window as any).grandstandSettings, 'posZ', 10, 100).name('Pos Z').onChange(updateGrandstand);
+
+		// --- Level 1 Stairs ---
+		const stairsMat = new StandardMaterial("stairsMat", scene);
+		stairsMat.diffuseTexture = new Texture("/level_01_stairs/stairs_01.png", scene, true, true);
+		stairsMat.diffuseTexture.hasAlpha = true;
+		stairsMat.useAlphaFromDiffuseTexture = true;
+		stairsMat.emissiveColor = new Color3(1, 1, 1);
+		stairsMat.disableLighting = true;
+
+		const stairs = MeshBuilder.CreatePlane("stairs", { size: 10 }, scene);
+		stairs.material = stairsMat;
+		stairs.billboardMode = Mesh.BILLBOARDMODE_Y;
+		
+		(window as any).stairsSettings = {
+			enabled: true,
+			scale: 1,
+			posX: 0, posY: 0, posZ: 15
+		};
+
+		const updateStairs = () => {
+			const level = (window as any).gameManager?.level || 1;
+			const st = (window as any).stairsSettings;
+			
+			if (level === 1 && st.enabled) {
+				stairs.isVisible = true;
+				const applyScale = (t: Texture) => {
+					if (t.getSize) {
+						const size = t.getSize();
+						const aspect = (size.width && size.height) ? size.width / size.height : 1;
+						stairs.scaling.set(st.scale * aspect, st.scale, st.scale);
+					} else {
+						stairs.scaling.set(st.scale, st.scale, st.scale);
+					}
+				};
+
+				if (stairsMat.diffuseTexture && (stairsMat.diffuseTexture as Texture).isReady()) {
+					applyScale(stairsMat.diffuseTexture as Texture);
+				} else if (stairsMat.diffuseTexture) {
+					(stairsMat.diffuseTexture as Texture).onLoadObservable.addOnce(() => applyScale(stairsMat.diffuseTexture as Texture));
+				} else {
+					stairs.scaling.set(st.scale, st.scale, st.scale);
+				}
+
+				stairs.position.set(st.posX, st.posY, st.posZ);
+			} else {
+				stairs.isVisible = false;
+			}
+		};
+		(window as any).updateStairs = updateStairs;
+		updateStairs();
+
+		const stairsFolder = gui.addFolder('Level 1 Stairs');
+		stairsFolder.add((window as any).stairsSettings, 'enabled').name('Enabled').onChange(updateStairs);
+		stairsFolder.add((window as any).stairsSettings, 'scale', 0.1, 5).name('Scale').onChange(updateStairs);
+		stairsFolder.add((window as any).stairsSettings, 'posX', -50, 50).name('Pos X').onChange(updateStairs);
+		stairsFolder.add((window as any).stairsSettings, 'posY', -10, 30).name('Pos Y').onChange(updateStairs);
+		stairsFolder.add((window as any).stairsSettings, 'posZ', 10, 100).name('Pos Z').onChange(updateStairs);
 
 		// --- Level 1 Grass Decals ---
 		const grassSettings: any = {};
