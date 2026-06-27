@@ -20,13 +20,18 @@ export const MainMenu: React.FC<MainMenuProps> = ({ onPlay }) => {
 
   return (
     <div className="absolute inset-0 z-[100] flex items-center justify-center bg-black overflow-hidden pointer-events-auto">
-      {/* Full screen container */}
-      <div className="relative w-full h-full flex items-center justify-center">
+      {/* 16:9 Container that scales to cover the entire screen */}
+      <div 
+        className="relative flex items-center justify-center min-w-[100vw] min-h-[100vh]"
+        style={{ 
+          aspectRatio: '16/9' 
+        }}
+      >
         {/* Background Image filling the container */}
         <img 
           src="/main_menu/main_menu_background_01.png" 
           alt="Main Menu Background" 
-          className="absolute inset-0 w-full h-full select-none pointer-events-none"
+          className="absolute inset-0 w-full h-full object-cover select-none pointer-events-none"
           style={{
             objectPosition: menuConfig.bgObjectPosition || 'center'
           }}
