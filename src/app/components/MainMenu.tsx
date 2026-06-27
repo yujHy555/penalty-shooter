@@ -20,10 +20,13 @@ export const MainMenu: React.FC<MainMenuProps> = ({ onPlay }) => {
 
   return (
     <div className="absolute inset-0 z-[100] flex items-center justify-center bg-black overflow-hidden pointer-events-auto">
-      {/* 16:9 Container that scales to cover the entire screen */}
+      {/* 16:9 Container maxed out at 1920x1080 to prevent overscaling on large monitors */}
       <div 
-        className="relative flex items-center justify-center min-w-[100vw] min-h-[100vh]"
+        className="relative flex items-center justify-center"
         style={{ 
+          width: '100%',
+          maxWidth: 'min(100vw, 1920px)',
+          maxHeight: 'min(100vh, 1080px)',
           aspectRatio: '16/9' 
         }}
       >
