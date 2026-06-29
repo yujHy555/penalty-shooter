@@ -1400,8 +1400,6 @@ export default function Home() {
 		crowdAtlasMat.diffuseTexture = new Texture("/level_03_stadium/crowd_particles_01.png", scene, true, true);
 		crowdAtlasMat.diffuseTexture.hasAlpha = true;
 		crowdAtlasMat.useAlphaFromDiffuseTexture = true;
-		// Restore ALPHABLEND to fix cut/choppy edges. The sorting issue was due to the SPS mesh pivot!
-		crowdAtlasMat.transparencyMode = 0; // ALPHABLEND
 		crowdAtlasMat.emissiveColor = new Color3(1, 1, 1);
 		crowdAtlasMat.disableLighting = true;
 
