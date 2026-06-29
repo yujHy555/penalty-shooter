@@ -1397,8 +1397,8 @@ export default function Home() {
 		crowdShape.dispose();
 		
 		const crowdAtlasMat = new StandardMaterial("crowdAtlasMat", scene);
-		// Use NEAREST sampling mode (1) to keep the particles sharp/crisp instead of blurry
-		crowdAtlasMat.diffuseTexture = new Texture("/level_03_stadium/crowd_particles_01.png", scene, true, false, 1);
+		// Revert to default trilinear sampling for smooth edges instead of pixelated/rough edges
+		crowdAtlasMat.diffuseTexture = new Texture("/level_03_stadium/crowd_particles_01.png", scene, true, true);
 		crowdAtlasMat.diffuseTexture.hasAlpha = true;
 		crowdAtlasMat.useAlphaFromDiffuseTexture = true;
 		crowdAtlasMat.emissiveColor = new Color3(1, 1, 1);
@@ -1412,6 +1412,7 @@ export default function Home() {
 			enabled: true,
 			count: 1500,
 			minSize: 0.8, maxSize: 1.5,
+			aspectRatio: 1.0, // Expose aspect ratio so user can fix squished/stretched shapes
 			areaWidth: 160, areaHeight: 40,
 			baseY: 15, baseZ: 95,
 			jumpHeight: 2.0, jumpSpeed: 15, jumpDuration: 2.0
@@ -1434,8 +1435,8 @@ export default function Home() {
 				particle.props = { baseY: particle.position.y, jumpOffset: Math.random() * Math.PI * 2 };
 
 				const size = st.minSize + Math.random() * (st.maxSize - st.minSize);
-				// The image is 4 frames wide (512x512 total), so each frame is 128x512 (1:4 ratio)
-				particle.scaling.set(size * 0.25, size, size);
+				// Use the exposed aspectRatio to let the user dial in the perfect shape
+				particle.scaling.set(size * st.aspectRatio, size, size);
 
 				const variant = Math.floor(Math.random() * 4);
 				particle.uvs.x = variant * 0.25;
@@ -1452,6 +1453,7 @@ export default function Home() {
 		crowdSpsFolder.add((window as any).lvl3CrowdSettings, 'count', 10, 3000, 10).name('Particle Count').onChange(reinitCrowd);
 		crowdSpsFolder.add((window as any).lvl3CrowdSettings, 'minSize', 0.1, 5).name('Min Size').onChange(reinitCrowd);
 		crowdSpsFolder.add((window as any).lvl3CrowdSettings, 'maxSize', 0.1, 5).name('Max Size').onChange(reinitCrowd);
+		crowdSpsFolder.add((window as any).lvl3CrowdSettings, 'aspectRatio', 0.1, 5).name('Aspect Ratio').onChange(reinitCrowd);
 		crowdSpsFolder.add((window as any).lvl3CrowdSettings, 'areaWidth', 10, 300).name('Area Width').onChange(reinitCrowd);
 		crowdSpsFolder.add((window as any).lvl3CrowdSettings, 'areaHeight', 5, 100).name('Area Height').onChange(reinitCrowd);
 		crowdSpsFolder.add((window as any).lvl3CrowdSettings, 'baseY', -50, 100).name('Base Y').onChange(reinitCrowd);
@@ -1484,7 +1486,10 @@ export default function Home() {
 		// 3. Camera Flashes
 		const flashSys = new ParticleSystem("flashes", 1000, scene);
 		flashSys.particleTexture = new Texture("/level_03_stadium/camera_flash_01.png", scene);
-		flashSys.emitter = new Vector3(0, 35, 95); 
+		// Crucial for transparent PNGs so they don't render as solid white squares
+		flashSys.blendMode = ParticleSystem.BLENDMODE_STANDARD;
+		
+		flashSys.emitter = new Vector3(0, 35, 95);  
 		flashSys.minEmitBox = new Vector3(-80, -20, 0); 
 		flashSys.maxEmitBox = new Vector3(80, 20, 0);
 		
