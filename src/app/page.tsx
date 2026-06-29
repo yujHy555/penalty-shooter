@@ -1401,6 +1401,8 @@ export default function Home() {
 		crowdAtlasMat.diffuseTexture = new Texture("/level_03_stadium/crowd_particles_01.png", scene, true, true);
 		crowdAtlasMat.diffuseTexture.hasAlpha = true;
 		crowdAtlasMat.useAlphaFromDiffuseTexture = true;
+		// Use ALPHATEST to force depth-buffer writing, which perfectly fixes Z-sorting issues with other layers!
+		crowdAtlasMat.transparencyMode = 2; // Material.MATERIAL_ALPHATEST
 		crowdAtlasMat.emissiveColor = new Color3(1, 1, 1);
 		crowdAtlasMat.disableLighting = true;
 
