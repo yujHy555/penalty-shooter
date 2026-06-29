@@ -30,6 +30,7 @@ import { Texture } from "@babylonjs/core/Materials/Textures/texture";
 import { VideoTexture } from "@babylonjs/core/Materials/Textures/videoTexture";
 import { TrailMesh } from "@babylonjs/core/Meshes/trailMesh";
 import { ParticleSystem } from "@babylonjs/core/Particles/particleSystem";
+import { SolidParticleSystem } from "@babylonjs/core/Particles/solidParticleSystem";
 import { Color4 } from "@babylonjs/core/Maths/math.color";
 import "@babylonjs/core/XR/features/WebXRDepthSensing";
 
@@ -127,6 +128,7 @@ export default function Home() {
 							if ((window as any).applyFieldLinesSettings) (window as any).applyFieldLinesSettings();
 							if ((window as any).updateGrandstand) (window as any).updateGrandstand();
 							if ((window as any).updateStairs) (window as any).updateStairs();
+							if ((window as any).updateLvl3Stadium) (window as any).updateLvl3Stadium();
 						}
 						return newLevel;
 					});
@@ -782,6 +784,7 @@ export default function Home() {
 					if ((window as any).updateStones) (window as any).updateStones();
 					if ((window as any).updateGrandstand) (window as any).updateGrandstand();
 					if ((window as any).updateStairs) (window as any).updateStairs();
+					if ((window as any).updateLvl3Stadium) (window as any).updateLvl3Stadium();
 				}
 			},
 			jumpToLevel2: () => {
@@ -802,6 +805,7 @@ export default function Home() {
 					if ((window as any).updateStones) (window as any).updateStones();
 					if ((window as any).updateGrandstand) (window as any).updateGrandstand();
 					if ((window as any).updateStairs) (window as any).updateStairs();
+					if ((window as any).updateLvl3Stadium) (window as any).updateLvl3Stadium();
 				}
 			},
 			jumpToLevel3: () => {
@@ -822,6 +826,7 @@ export default function Home() {
 					if ((window as any).updateStones) (window as any).updateStones();
 					if ((window as any).updateGrandstand) (window as any).updateGrandstand();
 					if ((window as any).updateStairs) (window as any).updateStairs();
+					if ((window as any).updateLvl3Stadium) (window as any).updateLvl3Stadium();
 				}
 			}
 		};
@@ -1350,6 +1355,185 @@ export default function Home() {
 		gsFolder.add((window as any).grandstandSettings, 'posY', -10, 30).name('Pos Y').onChange(updateGrandstand);
 		gsFolder.add((window as any).grandstandSettings, 'posZ', 10, 100).name('Pos Z').onChange(updateGrandstand);
 
+		// --- Level 3 Stadium ---
+		const lvl3StadiumFolder = gui.addFolder('Level 3 Stadium');
+
+		// 1. Background Plane
+		const stadiumMat = new StandardMaterial("stadiumMat", scene);
+		stadiumMat.diffuseTexture = new Texture("/level_03_stadium/background_stadium.png", scene, true, true);
+		stadiumMat.diffuseTexture.hasAlpha = true;
+		stadiumMat.useAlphaFromDiffuseTexture = true;
+		stadiumMat.emissiveColor = new Color3(1, 1, 1);
+		stadiumMat.disableLighting = true;
+
+		const stadiumPlane = MeshBuilder.CreatePlane("stadiumPlane", { size: 100 }, scene);
+		stadiumPlane.material = stadiumMat;
+		stadiumPlane.billboardMode = Mesh.BILLBOARDMODE_Y;
+
+		(window as any).stadiumSettings = {
+			enabled: true,
+			scaleX: 2.5, scaleY: 2.5,
+			posX: 0, posY: 35, posZ: 100
+		};
+
+		const bgFolder = lvl3StadiumFolder.addFolder('Background');
+		const updateStadiumPlane = () => {
+			const st = (window as any).stadiumSettings;
+			stadiumPlane.isVisible = ((window as any).gameManager?.level || 1) === 3 && st.enabled;
+			stadiumPlane.scaling.set(st.scaleX, st.scaleY, 1);
+			stadiumPlane.position.set(st.posX, st.posY, st.posZ);
+		};
+		bgFolder.add((window as any).stadiumSettings, 'enabled').name('Enabled').onChange(updateStadiumPlane);
+		bgFolder.add((window as any).stadiumSettings, 'scaleX', 0.1, 10).name('Scale X').onChange(updateStadiumPlane);
+		bgFolder.add((window as any).stadiumSettings, 'scaleY', 0.1, 10).name('Scale Y').onChange(updateStadiumPlane);
+		bgFolder.add((window as any).stadiumSettings, 'posX', -100, 100).name('Pos X').onChange(updateStadiumPlane);
+		bgFolder.add((window as any).stadiumSettings, 'posY', -50, 100).name('Pos Y').onChange(updateStadiumPlane);
+		bgFolder.add((window as any).stadiumSettings, 'posZ', 10, 200).name('Pos Z').onChange(updateStadiumPlane);
+
+		// 2. Crowd Particles (SPS)
+		const sps = new SolidParticleSystem("crowdSPS", scene, { updatable: true });
+		const crowdShape = MeshBuilder.CreatePlane("crowdParticle", { size: 1 }, scene);
+		sps.addShape(crowdShape, 3000); // Max 3000 particles
+		crowdShape.dispose();
+		
+		const crowdAtlasMat = new StandardMaterial("crowdAtlasMat", scene);
+		crowdAtlasMat.diffuseTexture = new Texture("/level_03_stadium/crowd_particles_01.png", scene, true, true);
+		crowdAtlasMat.diffuseTexture.hasAlpha = true;
+		crowdAtlasMat.useAlphaFromDiffuseTexture = true;
+		crowdAtlasMat.emissiveColor = new Color3(1, 1, 1);
+		crowdAtlasMat.disableLighting = true;
+
+		const spsMesh = sps.buildMesh();
+		spsMesh.material = crowdAtlasMat;
+		spsMesh.billboardMode = Mesh.BILLBOARDMODE_Y;
+
+		(window as any).lvl3CrowdSettings = {
+			enabled: true,
+			count: 1500,
+			minSize: 0.8, maxSize: 1.5,
+			areaWidth: 160, areaHeight: 40,
+			baseY: 15, baseZ: 95,
+			jumpHeight: 2.0, jumpSpeed: 15, jumpDuration: 2.0
+		};
+
+		const crowdSpsFolder = lvl3StadiumFolder.addFolder('Crowd Particles');
+		const reinitCrowd = () => {
+			const st = (window as any).lvl3CrowdSettings;
+			for (let p = 0; p < sps.nbParticles; p++) {
+				const particle = sps.particles[p];
+				if (p >= st.count) {
+					particle.isVisible = false;
+					continue;
+				}
+				particle.isVisible = true;
+				particle.position.x = (Math.random() - 0.5) * st.areaWidth;
+				particle.position.y = st.baseY + (Math.random() * st.areaHeight);
+				particle.position.z = st.baseZ + (Math.random() * 5); // Slight depth variation
+
+				particle.props = { baseY: particle.position.y, jumpOffset: Math.random() * Math.PI * 2 };
+
+				const size = st.minSize + Math.random() * (st.maxSize - st.minSize);
+				particle.scaling.set(size, size, size);
+
+				const variant = Math.floor(Math.random() * 4);
+				particle.uvs.x = variant * 0.25;
+				particle.uvs.y = 0;
+				particle.uvs.z = (variant + 1) * 0.25;
+				particle.uvs.w = 1;
+			}
+			sps.setParticles();
+		};
+
+		crowdSpsFolder.add((window as any).lvl3CrowdSettings, 'enabled').name('Enabled').onChange(() => {
+			spsMesh.isVisible = ((window as any).gameManager?.level || 1) === 3 && (window as any).lvl3CrowdSettings.enabled;
+		});
+		crowdSpsFolder.add((window as any).lvl3CrowdSettings, 'count', 10, 3000, 10).name('Particle Count').onChange(reinitCrowd);
+		crowdSpsFolder.add((window as any).lvl3CrowdSettings, 'minSize', 0.1, 5).name('Min Size').onChange(reinitCrowd);
+		crowdSpsFolder.add((window as any).lvl3CrowdSettings, 'maxSize', 0.1, 5).name('Max Size').onChange(reinitCrowd);
+		crowdSpsFolder.add((window as any).lvl3CrowdSettings, 'areaWidth', 10, 300).name('Area Width').onChange(reinitCrowd);
+		crowdSpsFolder.add((window as any).lvl3CrowdSettings, 'areaHeight', 5, 100).name('Area Height').onChange(reinitCrowd);
+		crowdSpsFolder.add((window as any).lvl3CrowdSettings, 'baseY', -50, 100).name('Base Y').onChange(reinitCrowd);
+		crowdSpsFolder.add((window as any).lvl3CrowdSettings, 'baseZ', 10, 200).name('Base Z').onChange(reinitCrowd);
+		crowdSpsFolder.add((window as any).lvl3CrowdSettings, 'jumpHeight', 0.1, 10).name('Jump Height');
+		crowdSpsFolder.add((window as any).lvl3CrowdSettings, 'jumpSpeed', 1, 30).name('Jump Speed');
+		crowdSpsFolder.add((window as any).lvl3CrowdSettings, 'jumpDuration', 0.5, 5).name('Jump Duration');
+
+		sps.updateParticle = (p) => {
+			const st = (window as any).lvl3CrowdSettings;
+			if (p.idx >= st.count) return p;
+			
+			if ((window as any).isCrowdJumping) {
+				const timer = (window as any).crowdJumpTimer || 0;
+				let localTime = (timer * st.jumpSpeed) - p.props.jumpOffset;
+				if (localTime < 0) localTime = 0;
+				
+				if (timer < st.jumpDuration + (p.props.jumpOffset / st.jumpSpeed)) { 
+					const decay = Math.max(0, 1 - (timer / st.jumpDuration));
+					p.position.y = p.props.baseY + Math.abs(Math.sin(localTime)) * st.jumpHeight * decay;
+				} else {
+					p.position.y = p.props.baseY;
+				}
+			} else {
+				p.position.y = p.props.baseY;
+			}
+			return p;
+		};
+
+		// 3. Camera Flashes
+		const flashSys = new ParticleSystem("flashes", 1000, scene);
+		flashSys.particleTexture = new Texture("/level_03_stadium/camera_flash_01.png", scene);
+		flashSys.emitter = new Vector3(0, 35, 95); 
+		flashSys.minEmitBox = new Vector3(-80, -20, 0); 
+		flashSys.maxEmitBox = new Vector3(80, 20, 0);
+		
+		flashSys.color1 = new Color4(1, 1, 1, 1.0);
+		flashSys.color2 = new Color4(1, 1, 1, 1.0);
+		flashSys.colorDead = new Color4(1, 1, 1, 0.0);
+		
+		flashSys.minSize = 0.5;
+		flashSys.maxSize = 2.0;
+		flashSys.minLifeTime = 0.1;
+		flashSys.maxLifeTime = 0.3;
+		flashSys.gravity = new Vector3(0, 0, 0);
+		flashSys.direction1 = new Vector3(0, 0, 0);
+		flashSys.direction2 = new Vector3(0, 0, 0);
+		
+		(window as any).lvl3FlashesSettings = {
+			enabled: true,
+			ambientRate: 10,
+			goalRate: 200,
+			minSize: 0.5, maxSize: 2.0
+		};
+		
+		flashSys.emitRate = 10;
+
+		const flashFolder = lvl3StadiumFolder.addFolder('Camera Flashes');
+		flashFolder.add((window as any).lvl3FlashesSettings, 'enabled').name('Enabled');
+		flashFolder.add((window as any).lvl3FlashesSettings, 'ambientRate', 0, 100).name('Ambient Rate').onChange((v: number) => { if (!(window as any).isCrowdJumping) flashSys.emitRate = v; });
+		flashFolder.add((window as any).lvl3FlashesSettings, 'goalRate', 10, 500).name('Goal Rate').onChange((v: number) => { if ((window as any).isCrowdJumping) flashSys.emitRate = v; });
+		flashFolder.add((window as any).lvl3FlashesSettings, 'minSize', 0.1, 5).name('Min Size').onChange((v: number) => flashSys.minSize = v);
+		flashFolder.add((window as any).lvl3FlashesSettings, 'maxSize', 0.1, 5).name('Max Size').onChange((v: number) => flashSys.maxSize = v);
+
+		const updateLvl3Stadium = () => {
+			const level = (window as any).gameManager?.level || 1;
+			updateStadiumPlane();
+			
+			if (level === 3) {
+				spsMesh.isVisible = (window as any).lvl3CrowdSettings.enabled;
+				if (!sps.particles[0]?.props) reinitCrowd();
+				
+				if ((window as any).lvl3FlashesSettings.enabled) {
+					if (!flashSys.isStarted()) flashSys.start();
+				} else {
+					flashSys.stop();
+				}
+			} else {
+				spsMesh.isVisible = false;
+				flashSys.stop();
+			}
+		};
+		(window as any).updateLvl3Stadium = updateLvl3Stadium;
+
 		// --- Level 1 Stairs ---
 		const stairsMat = new StandardMaterial("stairsMat", scene);
 		stairsMat.diffuseTexture = new Texture("/level_01_stairs/stairs_01.png", scene, true, true);
@@ -1700,9 +1884,17 @@ export default function Home() {
 		let isCrowdJumping = false;
 		let crowdJumpTimer = 0;
 		(window as any).isCrowdJumping = false;
+		(window as any).crowdJumpTimer = 0;
 		const triggerCrowdJump = () => {
 			(window as any).isCrowdJumping = true;
 			crowdJumpTimer = 0;
+			(window as any).crowdJumpTimer = 0;
+			
+			// Spike camera flashes
+			if ((window as any).lvl3FlashesSettings?.enabled) {
+				flashSys.emitRate = (window as any).lvl3FlashesSettings.goalRate;
+			}
+
 			crowdMeshes.forEach(m => {
 				if (m.isVisible) {
 					(m as any).jumpOffset = Math.random() * Math.PI;
@@ -1712,10 +1904,22 @@ export default function Home() {
 		(window as any).triggerCrowdJump = triggerCrowdJump;
 
 		scene.onBeforeRenderObservable.add(() => {
+			// Update SPS Crowd
+			if (((window as any).gameManager?.level || 1) === 3 && (window as any).lvl3CrowdSettings?.enabled) {
+				sps.setParticles();
+			}
+
 			if ((window as any).isCrowdJumping) {
 				crowdJumpTimer += scene.getEngine().getDeltaTime() * 0.001;
+				(window as any).crowdJumpTimer = crowdJumpTimer;
 				
 				let stillJumping = false;
+				
+				// Reset flashes if jumping is mostly done (using 2.0s as a baseline)
+				if (crowdJumpTimer > 2.0 && flashSys.emitRate > ((window as any).lvl3FlashesSettings?.ambientRate || 10)) {
+					flashSys.emitRate = (window as any).lvl3FlashesSettings?.ambientRate || 10;
+				}
+
 				crowdMeshes.forEach((mesh, i) => {
 					if (mesh.isVisible) {
 						const l = Math.floor(i / 10) + 1;
