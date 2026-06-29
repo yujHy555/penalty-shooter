@@ -1543,6 +1543,7 @@ export default function Home() {
 			}
 		};
 		(window as any).updateLvl3Stadium = updateLvl3Stadium;
+		updateLvl3Stadium(); // Call immediately on load so it hides if we start on Level 1
 
 		// --- Level 1 Stairs ---
 		const stairsMat = new StandardMaterial("stairsMat", scene);
