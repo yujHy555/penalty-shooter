@@ -1397,7 +1397,8 @@ export default function Home() {
 		crowdShape.dispose();
 		
 		const crowdAtlasMat = new StandardMaterial("crowdAtlasMat", scene);
-		crowdAtlasMat.diffuseTexture = new Texture("/level_03_stadium/crowd_particles_01.png", scene, true, true);
+		// Use NEAREST sampling mode (1) to keep the particles sharp/crisp instead of blurry
+		crowdAtlasMat.diffuseTexture = new Texture("/level_03_stadium/crowd_particles_01.png", scene, true, false, 1);
 		crowdAtlasMat.diffuseTexture.hasAlpha = true;
 		crowdAtlasMat.useAlphaFromDiffuseTexture = true;
 		crowdAtlasMat.emissiveColor = new Color3(1, 1, 1);
@@ -1433,7 +1434,8 @@ export default function Home() {
 				particle.props = { baseY: particle.position.y, jumpOffset: Math.random() * Math.PI * 2 };
 
 				const size = st.minSize + Math.random() * (st.maxSize - st.minSize);
-				particle.scaling.set(size, size, size);
+				// The image is 4 frames wide (512x512 total), so each frame is 128x512 (1:4 ratio)
+				particle.scaling.set(size * 0.25, size, size);
 
 				const variant = Math.floor(Math.random() * 4);
 				particle.uvs.x = variant * 0.25;
