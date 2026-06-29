@@ -1397,12 +1397,11 @@ export default function Home() {
 		crowdShape.dispose();
 		
 		const crowdAtlasMat = new StandardMaterial("crowdAtlasMat", scene);
-		// Revert to default trilinear sampling for smooth edges instead of pixelated/rough edges
 		crowdAtlasMat.diffuseTexture = new Texture("/level_03_stadium/crowd_particles_01.png", scene, true, true);
 		crowdAtlasMat.diffuseTexture.hasAlpha = true;
 		crowdAtlasMat.useAlphaFromDiffuseTexture = true;
-		// Use ALPHATEST to force depth-buffer writing, which perfectly fixes Z-sorting issues with other layers!
-		crowdAtlasMat.transparencyMode = 2; // Material.MATERIAL_ALPHATEST
+		// Restore ALPHABLEND to fix cut/choppy edges. The sorting issue was due to the SPS mesh pivot!
+		crowdAtlasMat.transparencyMode = 0; // ALPHABLEND
 		crowdAtlasMat.emissiveColor = new Color3(1, 1, 1);
 		crowdAtlasMat.disableLighting = true;
 
@@ -1413,16 +1412,19 @@ export default function Home() {
 		(window as any).lvl3CrowdSettings = {
 			enabled: true,
 			count: 1500,
-			minSize: 0.8, maxSize: 1.5,
-			aspectRatio: 1.0, // Expose aspect ratio so user can fix squished/stretched shapes
-			areaWidth: 160, areaHeight: 40,
-			baseY: 15, baseZ: 95,
+			minSize: 3.5, maxSize: 5.5, // Increased size to compensate for aspect ratio
+			aspectRatio: 0.25, // Default to 0.25 to make the 1:4 slices perfect circles
+			areaWidth: 200, areaHeight: 80,
+			baseY: 20, baseZ: 95,
 			jumpHeight: 2.0, jumpSpeed: 15, jumpDuration: 2.0
 		};
 
 		const crowdSpsFolder = lvl3StadiumFolder.addFolder('Crowd Particles');
 		const reinitCrowd = () => {
 			const st = (window as any).lvl3CrowdSettings;
+			// Move the entire SPS mesh to baseZ so Babylon's depth-sorting algorithms correctly place it behind the net!
+			spsMesh.position.z = st.baseZ;
+
 			for (let p = 0; p < sps.nbParticles; p++) {
 				const particle = sps.particles[p];
 				if (p >= st.count) {
@@ -1432,7 +1434,8 @@ export default function Home() {
 				particle.isVisible = true;
 				particle.position.x = (Math.random() - 0.5) * st.areaWidth;
 				particle.position.y = st.baseY + (Math.random() * st.areaHeight);
-				particle.position.z = st.baseZ + (Math.random() * 5); // Slight depth variation
+				// Z is now relative to the spsMesh!
+				particle.position.z = (Math.random() - 0.5) * 5; 
 
 				particle.props = { baseY: particle.position.y, jumpOffset: Math.random() * Math.PI * 2 };
 
