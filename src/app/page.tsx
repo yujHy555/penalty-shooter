@@ -1360,9 +1360,11 @@ export default function Home() {
 
 		// 1. Background Plane
 		const stadiumMat = new StandardMaterial("stadiumMat", scene);
-		stadiumMat.diffuseTexture = new Texture("/level_03_stadium/background_stadium.png", scene, true, true);
+		stadiumMat.diffuseTexture = new Texture("/level_03_stadium/background_stadium.png", scene);
 		stadiumMat.diffuseTexture.hasAlpha = true;
 		stadiumMat.useAlphaFromDiffuseTexture = true;
+		// Use ALPHATEST so it renders in the Opaque pass and perfectly sorts behind all ALPHABLEND particles (crowds/flashes)
+		stadiumMat.transparencyMode = 1; // Material.MATERIAL_ALPHATEST
 		stadiumMat.emissiveColor = new Color3(1, 1, 1);
 		stadiumMat.disableLighting = true;
 
@@ -1454,9 +1456,11 @@ export default function Home() {
 				particle.scaling.set(size * st.aspectRatio, size, size);
 
 				const variant = Math.floor(Math.random() * 4);
-				particle.uvs.x = variant * 0.25;
+				// Add a tiny inset to prevent texture bleeding from neighboring sprites (red artifacts)
+				const bleed = 0.02;
+				particle.uvs.x = variant * 0.25 + bleed;
 				particle.uvs.y = 0;
-				particle.uvs.z = (variant + 1) * 0.25;
+				particle.uvs.z = (variant + 1) * 0.25 - bleed;
 				particle.uvs.w = 1;
 			}
 			sps.setParticles();
