@@ -604,10 +604,10 @@ export default function Home() {
 		(window as any).aiSettings = {
 			wrongDiveProbLvl1: 0.2,
 			predictionErrorLvl1: 0.9,
-			wrongDiveProbLvl2: 0.2,
-			predictionErrorLvl2: 0.7,
-			wrongDiveProbLvl3: 0.05,
-			predictionErrorLvl3: 0.8,
+			wrongDiveProbLvl2: 0.1,
+			predictionErrorLvl2: 0.4,
+			wrongDiveProbLvl3: 0.0,
+			predictionErrorLvl3: 0.1,
 		};
 		const aiFolder = gui.addFolder('Goalkeeper AI Difficulty');
 		const lvl1 = aiFolder.addFolder('Level 1');
