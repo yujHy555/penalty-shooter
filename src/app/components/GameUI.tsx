@@ -502,7 +502,7 @@ export function GameUI({ onKickParamsUpdate, onKickExecute, phase, setPhase, lev
                   className="w-[600px] h-auto object-contain"
                 />
               </div>
-              <div className="absolute inset-0 pointer-events-none z-10" style={{ transform: `scale(${sceneScale})` }}>
+              <div className="absolute inset-0 pointer-events-none z-10">
                 {[0,1,2,3,4].map((i) => {
                    const goals = shots.filter(s => s === "GOAL!").length;
                    const isGold = i < goals;
