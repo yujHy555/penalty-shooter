@@ -293,10 +293,14 @@ export default function Home() {
 			endSubScale: 1, endSubY: 0, endSubColor: "#ffffff",
 			endBtnScale: 1, endBtnY: 40, endBtnColor: "#000000", endBtnBgColor: "#22c55e",
 			compBgOpacity: 0.6,
-			compTitleScale: 1, compTitleY: 0, compTitleColor: "#facc15",
-			compSubScale: 1, compSubY: 0, compSubColor: "#ffffff",
-			compIconScale: 1, compIconY: 0, compIconColor: "#facc15",
-			compBtnScale: 1, compBtnY: 0, compBtnColor: "#000000", compBtnBgColor: "#ff6bba",
+			compImageScale: 1, compImageX: 0, compImageY: -50,
+			compStar1Scale: 1, compStar1X: 0, compStar1Y: 0,
+			compStar2Scale: 1, compStar2X: 0, compStar2Y: 0,
+			compStar3Scale: 1, compStar3X: 0, compStar3Y: 0,
+			compStar4Scale: 1, compStar4X: 0, compStar4Y: 0,
+			compStar5Scale: 1, compStar5X: 0, compStar5Y: 0,
+			compIconColor: "#facc15",
+			compBtnScale: 1, compBtnX: 0, compBtnY: 50,
 			failBgOpacity: 0.8,
 			failTitleScale: 1, failTitleY: 0, failTitleColor: "#f87171",
 			failSubScale: 1, failSubY: 0, failSubColor: "#d1d5db",
@@ -347,19 +351,38 @@ export default function Home() {
 
 		const compFolder = uiFolder.addFolder('Level Complete Screen');
 		compFolder.add((window as any).uiSettings, 'compBgOpacity', 0.0, 1.0).step(0.05).name('Bg Opacity').listen();
-		compFolder.add((window as any).uiSettings, 'compTitleScale', 0.1, 5.0).step(0.05).name('Title Scale').listen();
-		compFolder.add((window as any).uiSettings, 'compTitleY', -1000, 1000).step(1).name('Title Y Offset').listen();
-		compFolder.addColor((window as any).uiSettings, 'compTitleColor').name('Title Color').listen();
-		compFolder.add((window as any).uiSettings, 'compSubScale', 0.1, 5.0).step(0.05).name('Subtitle Scale').listen();
-		compFolder.add((window as any).uiSettings, 'compSubY', -1000, 1000).step(1).name('Subtitle Y Offset').listen();
-		compFolder.addColor((window as any).uiSettings, 'compSubColor').name('Subtitle Color').listen();
-		compFolder.add((window as any).uiSettings, 'compIconScale', 0.1, 5.0).step(0.05).name('Icon Scale').listen();
-		compFolder.add((window as any).uiSettings, 'compIconY', -1000, 1000).step(1).name('Icon Y Offset').listen();
-		compFolder.addColor((window as any).uiSettings, 'compIconColor').name('Icon Color').listen();
+		compFolder.add((window as any).uiSettings, 'compImageScale', 0.1, 5.0).step(0.05).name('Image Scale').listen();
+		compFolder.add((window as any).uiSettings, 'compImageX', -1000, 1000).step(1).name('Image X Offset').listen();
+		compFolder.add((window as any).uiSettings, 'compImageY', -1000, 1000).step(1).name('Image Y Offset').listen();
+		compFolder.addColor((window as any).uiSettings, 'compIconColor').name('Stars Base Color').listen();
+
+		const star1Folder = compFolder.addFolder('Star 1');
+		star1Folder.add((window as any).uiSettings, 'compStar1Scale', 0.1, 5.0).step(0.05).name('Scale').listen();
+		star1Folder.add((window as any).uiSettings, 'compStar1X', -1000, 1000).step(1).name('X Offset').listen();
+		star1Folder.add((window as any).uiSettings, 'compStar1Y', -1000, 1000).step(1).name('Y Offset').listen();
+
+		const star2Folder = compFolder.addFolder('Star 2');
+		star2Folder.add((window as any).uiSettings, 'compStar2Scale', 0.1, 5.0).step(0.05).name('Scale').listen();
+		star2Folder.add((window as any).uiSettings, 'compStar2X', -1000, 1000).step(1).name('X Offset').listen();
+		star2Folder.add((window as any).uiSettings, 'compStar2Y', -1000, 1000).step(1).name('Y Offset').listen();
+
+		const star3Folder = compFolder.addFolder('Star 3');
+		star3Folder.add((window as any).uiSettings, 'compStar3Scale', 0.1, 5.0).step(0.05).name('Scale').listen();
+		star3Folder.add((window as any).uiSettings, 'compStar3X', -1000, 1000).step(1).name('X Offset').listen();
+		star3Folder.add((window as any).uiSettings, 'compStar3Y', -1000, 1000).step(1).name('Y Offset').listen();
+
+		const star4Folder = compFolder.addFolder('Star 4');
+		star4Folder.add((window as any).uiSettings, 'compStar4Scale', 0.1, 5.0).step(0.05).name('Scale').listen();
+		star4Folder.add((window as any).uiSettings, 'compStar4X', -1000, 1000).step(1).name('X Offset').listen();
+		star4Folder.add((window as any).uiSettings, 'compStar4Y', -1000, 1000).step(1).name('Y Offset').listen();
+
+		const star5Folder = compFolder.addFolder('Star 5');
+		star5Folder.add((window as any).uiSettings, 'compStar5Scale', 0.1, 5.0).step(0.05).name('Scale').listen();
+		star5Folder.add((window as any).uiSettings, 'compStar5X', -1000, 1000).step(1).name('X Offset').listen();
+		star5Folder.add((window as any).uiSettings, 'compStar5Y', -1000, 1000).step(1).name('Y Offset').listen();
 		compFolder.add((window as any).uiSettings, 'compBtnScale', 0.1, 5.0).step(0.05).name('Button Scale').listen();
+		compFolder.add((window as any).uiSettings, 'compBtnX', -1000, 1000).step(1).name('Button X Offset').listen();
 		compFolder.add((window as any).uiSettings, 'compBtnY', -1000, 1000).step(1).name('Button Y Offset').listen();
-		compFolder.addColor((window as any).uiSettings, 'compBtnColor').name('Button Text Color').listen();
-		compFolder.addColor((window as any).uiSettings, 'compBtnBgColor').name('Button Bg Color').listen();
 
 		const failFolder = uiFolder.addFolder('Level Failed Screen');
 		failFolder.add((window as any).uiSettings, 'failBgOpacity', 0.0, 1.0).step(0.05).name('Bg Opacity').listen();

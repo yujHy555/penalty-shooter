@@ -492,49 +492,57 @@ export function GameUI({ onKickParamsUpdate, onKickExecute, phase, setPhase, lev
         {phase === "LEVEL_COMPLETE" && (
           <div className="absolute inset-0 flex flex-col items-center justify-center backdrop-blur-md z-50 pointer-events-auto" style={{ backgroundColor: `rgba(0,0,0,${uiConfig.compBgOpacity ?? 0.6})` }}>
             <div className="flex flex-col items-center justify-center w-full" style={{ transform: `scale(${sceneScale})` }}>
-              <div style={{ transform: `scale(${uiConfig.compTitleScale ?? 1.0}) translateY(${uiConfig.compTitleY ?? 0}px)` }}>
-                <h1 className="text-7xl font-black drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)] mb-2 animate-in slide-in-from-bottom-10 fade-in duration-500 py-2 leading-relaxed whitespace-nowrap"
-                    style={{ color: uiConfig.compTitleColor, WebkitTextFillColor: uiConfig.compTitleColor, backgroundImage: 'none' }}>
-                  CONGRATS
-                </h1>
+              <div 
+                className="animate-in slide-in-from-bottom-10 fade-in duration-500 mb-6"
+                style={{ transform: `scale(${uiConfig.compImageScale ?? 1.0}) translate(${uiConfig.compImageX ?? 0}px, ${uiConfig.compImageY ?? 0}px)` }}
+              >
+                <img 
+                  src="/level_complete_screen/level_complete_01.png" 
+                  alt="Level Complete" 
+                  className="w-[600px] h-auto object-contain"
+                />
               </div>
-              <div style={{ transform: `scale(${uiConfig.compSubScale ?? 1.0}) translateY(${uiConfig.compSubY ?? 0}px)` }}>
-                <h2 className="text-4xl font-bold mb-8 animate-in slide-in-from-bottom-10 fade-in duration-500 delay-100 fill-mode-both whitespace-nowrap"
-                    style={{ color: uiConfig.compSubColor }}>
-                  STAGE COMPLETE
-                </h2>
-              </div>
-              <div className="flex space-x-4 mb-12" style={{ transform: `scale(${uiConfig.compIconScale ?? 1.0}) translateY(${uiConfig.compIconY ?? 0}px)` }}>
+              <div className="absolute inset-0 pointer-events-none z-10" style={{ transform: `scale(${sceneScale})` }}>
                 {[0,1,2,3,4].map((i) => {
                    const goals = shots.filter(s => s === "GOAL!").length;
                    const isGold = i < goals;
+                   const scale = (uiConfig as any)[`compStar${i+1}Scale`] ?? 1.0;
+                   const xOffset = (uiConfig as any)[`compStar${i+1}X`] ?? 0;
+                   const yOffset = (uiConfig as any)[`compStar${i+1}Y`] ?? 0;
                    return (
                      <div key={i} 
-                          className={`animate-in fade-in duration-700 ${isGold ? "zoom-in spin-in-12" : "zoom-in-90"}`}
+                          className="absolute left-1/2 top-1/2"
                           style={{ 
-                            animationDelay: `${300 + i * 150}ms`,
-                            animationFillMode: "both",
-                            animationTimingFunction: isGold ? "cubic-bezier(0.175, 0.885, 0.32, 1.275)" : "ease-out"
+                            transform: `translate(-50%, -50%) translate(${xOffset}px, ${yOffset}px) scale(${scale})`,
                           }}>
-                       <svg className={`w-24 h-24 ${isGold ? "drop-shadow-[0_0_15px_rgba(250,204,21,0.6)]" : "drop-shadow-[0_0_5px_rgba(0,0,0,0.5)] text-gray-600/50"}`} 
-                            style={isGold ? { color: uiConfig.compIconColor } : {}}
-                            viewBox="0 0 24 24" fill="currentColor">
-                         <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                       </svg>
+                       <div className={`animate-in fade-in duration-700 ${isGold ? "zoom-in spin-in-12" : "zoom-in-90"}`}
+                            style={{ 
+                              animationDelay: `${300 + i * 150}ms`,
+                              animationFillMode: "both",
+                              animationTimingFunction: isGold ? "cubic-bezier(0.175, 0.885, 0.32, 1.275)" : "ease-out"
+                            }}>
+                         <svg className={`w-28 h-28 ${isGold ? "drop-shadow-[0_0_15px_rgba(250,204,21,0.6)]" : "drop-shadow-[0_0_5px_rgba(0,0,0,0.5)] text-gray-600/50"}`} 
+                              style={isGold ? { color: uiConfig.compIconColor || "#facc15" } : {}}
+                              fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                           <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                         </svg>
+                       </div>
                      </div>
                    );
                 })}
               </div>
-              <div style={{ transform: `scale(${uiConfig.compBtnScale ?? 1.0}) translateY(${uiConfig.compBtnY ?? 0}px)` }}>
+              <div 
+                className="animate-in fade-in slide-in-from-bottom-5 duration-500 delay-500 fill-mode-both"
+                style={{ transform: `scale(${uiConfig.compBtnScale ?? 1.0}) translate(${uiConfig.compBtnX ?? 0}px, ${uiConfig.compBtnY ?? 0}px)` }}
+              >
                 <button 
-                  className="px-8 py-4 rounded-full font-black text-2xl shadow-[0_0_20px_rgba(250,204,21,0.4)] hover:scale-105 active:scale-95 transition-all animate-in slide-in-from-bottom-10 fade-in duration-500 delay-500 fill-mode-both whitespace-nowrap"
-                  style={{ backgroundColor: uiConfig.compBtnBgColor, color: uiConfig.compBtnColor, backgroundImage: 'none', animationFillMode: "both" }}
+                  className="hover:scale-105 active:scale-95 transition-transform"
                   onClick={(e) => {
                     e.stopPropagation();
                     if (onAdvanceLevel) onAdvanceLevel();
                   }}
                 >
-                  CONTINUE
+                  <img src="/level_complete_screen/continue_button_01.png" alt="Continue" className="w-[300px] h-auto object-contain" />
                 </button>
               </div>
             </div>
