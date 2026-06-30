@@ -302,9 +302,9 @@ export default function Home() {
 			compIconColor: "#facc15",
 			compBtnScale: 1, compBtnX: 0, compBtnY: 50,
 			failBgOpacity: 0.8,
-			failTitleScale: 1, failTitleY: 0, failTitleColor: "#f87171",
-			failSubScale: 1, failSubY: 0, failSubColor: "#d1d5db",
-			failBtnScale: 1, failBtnY: 0, failBtnColor: "#ffffff", failBtnBgColor: "#22c55e",
+			failImageScale: 1, failImageX: 0, failImageY: -50,
+			failSubScale: 1, failSubX: 0, failSubY: 0, failSubColor: "#d1d5db",
+			failBtnScale: 1, failBtnX: 0, failBtnY: 50,
 		};
 
 		(window as any).menuSettings = {
@@ -386,16 +386,16 @@ export default function Home() {
 
 		const failFolder = uiFolder.addFolder('Level Failed Screen');
 		failFolder.add((window as any).uiSettings, 'failBgOpacity', 0.0, 1.0).step(0.05).name('Bg Opacity').listen();
-		failFolder.add((window as any).uiSettings, 'failTitleScale', 0.1, 5.0).step(0.05).name('Title Scale').listen();
-		failFolder.add((window as any).uiSettings, 'failTitleY', -1000, 1000).step(1).name('Title Y Offset').listen();
-		failFolder.addColor((window as any).uiSettings, 'failTitleColor').name('Title Color').listen();
+		failFolder.add((window as any).uiSettings, 'failImageScale', 0.1, 5.0).step(0.05).name('Image Scale').listen();
+		failFolder.add((window as any).uiSettings, 'failImageX', -1000, 1000).step(1).name('Image X Offset').listen();
+		failFolder.add((window as any).uiSettings, 'failImageY', -1000, 1000).step(1).name('Image Y Offset').listen();
 		failFolder.add((window as any).uiSettings, 'failSubScale', 0.1, 5.0).step(0.05).name('Subtitle Scale').listen();
+		failFolder.add((window as any).uiSettings, 'failSubX', -1000, 1000).step(1).name('Subtitle X Offset').listen();
 		failFolder.add((window as any).uiSettings, 'failSubY', -1000, 1000).step(1).name('Subtitle Y Offset').listen();
 		failFolder.addColor((window as any).uiSettings, 'failSubColor').name('Subtitle Color').listen();
 		failFolder.add((window as any).uiSettings, 'failBtnScale', 0.1, 5.0).step(0.05).name('Button Scale').listen();
+		failFolder.add((window as any).uiSettings, 'failBtnX', -1000, 1000).step(1).name('Button X Offset').listen();
 		failFolder.add((window as any).uiSettings, 'failBtnY', -1000, 1000).step(1).name('Button Y Offset').listen();
-		failFolder.addColor((window as any).uiSettings, 'failBtnColor').name('Button Text Color').listen();
-		failFolder.addColor((window as any).uiSettings, 'failBtnBgColor').name('Button Bg Color').listen();
 		
 		const preloaderFolder = gui.addFolder('Preloader');
 		preloaderFolder.add((window as any).uiSettings, 'preloaderSpinnerScale', 0.1, 5.0).step(0.05).name('Spinner Scale').listen();

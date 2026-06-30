@@ -551,28 +551,34 @@ export function GameUI({ onKickParamsUpdate, onKickExecute, phase, setPhase, lev
         {phase === "LEVEL_FAILED" && (
           <div className="absolute inset-0 flex flex-col items-center justify-center backdrop-blur-md z-50 pointer-events-auto" style={{ backgroundColor: `rgba(0,0,0,${uiConfig.failBgOpacity ?? 0.8})` }}>
             <div className="flex flex-col items-center justify-center w-full" style={{ transform: `scale(${sceneScale})` }}>
-              <div style={{ transform: `scale(${uiConfig.failTitleScale ?? 1.0}) translateY(${uiConfig.failTitleY ?? 0}px)` }}>
-                <h1 className="text-7xl font-black drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)] mb-2 animate-in zoom-in fade-in duration-500 py-2 leading-relaxed whitespace-nowrap"
-                    style={{ color: uiConfig.failTitleColor, WebkitTextFillColor: uiConfig.failTitleColor, backgroundImage: 'none' }}>
-                  UNLUCKY
-                </h1>
+              <div 
+                className="animate-in slide-in-from-top-10 fade-in duration-500 mb-2"
+                style={{ transform: `scale(${uiConfig.failImageScale ?? 1.0}) translate(${uiConfig.failImageX ?? 0}px, ${uiConfig.failImageY ?? 0}px)` }}
+              >
+                <img 
+                  src="/level_failed_screen/level_failed_01.png" 
+                  alt="Level Failed" 
+                  className="w-[600px] h-auto object-contain"
+                />
               </div>
-              <div style={{ transform: `scale(${uiConfig.failSubScale ?? 1.0}) translateY(${uiConfig.failSubY ?? 0}px)` }}>
+              <div style={{ transform: `scale(${uiConfig.failSubScale ?? 1.0}) translate(${uiConfig.failSubX ?? 0}px, ${uiConfig.failSubY ?? 0}px)` }}>
                 <h2 className="text-4xl font-bold mb-12 animate-in zoom-in fade-in duration-500 delay-100 whitespace-nowrap" 
                     style={{ animationFillMode: "both", color: uiConfig.failSubColor }}>
                   BETTER LUCK NEXT TIME
                 </h2>
               </div>
-              <div style={{ transform: `scale(${uiConfig.failBtnScale ?? 1.0}) translateY(${uiConfig.failBtnY ?? 0}px)` }}>
+              <div 
+                className="animate-in fade-in slide-in-from-bottom-5 duration-500 delay-300 fill-mode-both"
+                style={{ transform: `scale(${uiConfig.failBtnScale ?? 1.0}) translate(${uiConfig.failBtnX ?? 0}px, ${uiConfig.failBtnY ?? 0}px)` }}
+              >
                 <button 
-                  className="px-8 py-4 rounded-full font-black text-2xl shadow-[0_0_20px_rgba(34,197,94,0.5)] hover:scale-105 active:scale-95 transition-all animate-in slide-in-from-bottom-10 fade-in duration-500 delay-300 whitespace-nowrap"
-                  style={{ backgroundColor: uiConfig.failBtnBgColor, color: uiConfig.failBtnColor, backgroundImage: 'none', animationFillMode: "both" }}
+                  className="hover:scale-105 active:scale-95 transition-transform"
                   onClick={(e) => {
                     e.stopPropagation();
                     if (onRetryLevel) onRetryLevel();
                   }}
                 >
-                  TRY AGAIN
+                  <img src="/level_failed_screen/try_again_button_01.png" alt="Try Again" className="w-[300px] h-auto object-contain" />
                 </button>
               </div>
             </div>
