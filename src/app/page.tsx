@@ -1423,6 +1423,11 @@ export default function Home() {
 			// Move the entire SPS mesh to baseZ so Babylon's depth-sorting algorithms correctly place it behind the net!
 			spsMesh.position.z = st.baseZ;
 
+			const cols = Math.max(1, Math.floor(Math.sqrt(st.count * (st.areaWidth / st.areaHeight))));
+			const rows = Math.ceil(st.count / cols);
+			const cellWidth = st.areaWidth / cols;
+			const cellHeight = st.areaHeight / rows;
+
 			for (let p = 0; p < sps.nbParticles; p++) {
 				const particle = sps.particles[p];
 				if (p >= st.count) {
@@ -1430,8 +1435,15 @@ export default function Home() {
 					continue;
 				}
 				particle.isVisible = true;
-				particle.position.x = (Math.random() - 0.5) * st.areaWidth;
-				particle.position.y = st.baseY + (Math.random() * st.areaHeight);
+
+				const row = Math.floor(p / cols);
+				const col = p % cols;
+
+				const baseX = -st.areaWidth / 2 + col * cellWidth + cellWidth / 2;
+				const baseY = st.baseY + row * cellHeight + cellHeight / 2;
+
+				particle.position.x = baseX + (Math.random() - 0.5) * cellWidth * 0.8;
+				particle.position.y = baseY + (Math.random() - 0.5) * cellHeight * 0.8;
 				// Z is now relative to the spsMesh!
 				particle.position.z = (Math.random() - 0.5) * 5; 
 
@@ -1492,7 +1504,13 @@ export default function Home() {
 		// Crucial for transparent PNGs so they don't render as solid white squares
 		flashSys.blendMode = ParticleSystem.BLENDMODE_STANDARD;
 		
-		flashSys.emitter = new Vector3(0, 35, 95);  
+		flashSys.emitter = new Vector3(0, 35, 95);  // initial position, will be overridden by settings
+		
+		const flSt = (window as any).lvl3FlashesSettings;
+		if (flSt && flSt.posX !== undefined) {
+			flashSys.emitter = new Vector3(flSt.posX, flSt.posY, flSt.posZ);
+		}
+
 		flashSys.minEmitBox = new Vector3(-80, -20, 0); 
 		flashSys.maxEmitBox = new Vector3(80, 20, 0);
 		
@@ -1512,8 +1530,19 @@ export default function Home() {
 			enabled: true,
 			ambientRate: 10,
 			goalRate: 200,
-			minSize: 0.5, maxSize: 2.0
+			minSize: 0.5, maxSize: 2.0,
+			posX: 0, posY: 35, posZ: 95
 		};
+		// Restore any previously saved settings from local variables if necessary, but we'll prioritize window object
+		if (!(window as any).lvl3FlashesSettings) {
+			(window as any).lvl3FlashesSettings = {
+				enabled: true,
+				ambientRate: 10,
+				goalRate: 200,
+				minSize: 0.5, maxSize: 2.0,
+				posX: 0, posY: 35, posZ: 95
+			};
+		}
 		
 		flashSys.emitRate = 10;
 
@@ -1523,6 +1552,9 @@ export default function Home() {
 		flashFolder.add((window as any).lvl3FlashesSettings, 'goalRate', 10, 500).name('Goal Rate').onChange((v: number) => { if ((window as any).isCrowdJumping) flashSys.emitRate = v; });
 		flashFolder.add((window as any).lvl3FlashesSettings, 'minSize', 0.1, 5).name('Min Size').onChange((v: number) => flashSys.minSize = v);
 		flashFolder.add((window as any).lvl3FlashesSettings, 'maxSize', 0.1, 5).name('Max Size').onChange((v: number) => flashSys.maxSize = v);
+		flashFolder.add((window as any).lvl3FlashesSettings, 'posX', -100, 100).name('Pos X').onChange((v: number) => { (flashSys.emitter as Vector3).x = v; });
+		flashFolder.add((window as any).lvl3FlashesSettings, 'posY', -50, 100).name('Pos Y').onChange((v: number) => { (flashSys.emitter as Vector3).y = v; });
+		flashFolder.add((window as any).lvl3FlashesSettings, 'posZ', 10, 200).name('Pos Z').onChange((v: number) => { (flashSys.emitter as Vector3).z = v; });
 
 		const updateLvl3Stadium = () => {
 			const level = (window as any).gameManager?.level || 1;
