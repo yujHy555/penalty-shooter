@@ -57,6 +57,7 @@ import { HemisphericLight } from "@babylonjs/core/Lights/hemisphericLight";
 import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder";
 import { Mesh } from "@babylonjs/core/Meshes/mesh";
 import { StandardMaterial } from "@babylonjs/core/Materials/standardMaterial";
+import { MultiMaterial } from "@babylonjs/core/Materials/multiMaterial";
 import { Color3 } from "@babylonjs/core/Maths/math.color";
 import { PhysicsAggregate, PhysicsShapeType } from "@babylonjs/core/Physics/v2";
 
