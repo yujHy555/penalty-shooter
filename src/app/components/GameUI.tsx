@@ -457,7 +457,7 @@ export function GameUI({ onKickParamsUpdate, onKickExecute, phase, setPhase, lev
         )}
         {phase === "ENDGAME" && (
           <div className="absolute inset-0 flex flex-col items-center justify-center backdrop-blur-md z-50 pointer-events-auto" style={{ backgroundColor: `rgba(0,0,0,${uiConfig.endBgOpacity ?? 0.8})` }}>
-            <div className="flex flex-col items-center justify-center w-full" style={{ transform: `scale(${sceneScale})` }}>
+            <div className="flex flex-col items-center justify-center w-[1920px] shrink-0" style={{ transform: `scale(${sceneScale})` }}>
               <div style={{ transform: `scale(${uiConfig.endTitleScale ?? 1.0}) translateY(${uiConfig.endTitleY ?? 0}px)` }}>
                 <h1 className="text-8xl font-black drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)] mb-4 animate-in zoom-in fade-in duration-500 whitespace-nowrap"
                     style={{ color: uiConfig.endTitleColor }}>
@@ -491,7 +491,7 @@ export function GameUI({ onKickParamsUpdate, onKickExecute, phase, setPhase, lev
         )}
         {phase === "LEVEL_COMPLETE" && (
           <div className="absolute inset-0 flex flex-col items-center justify-center backdrop-blur-md z-50 pointer-events-auto" style={{ backgroundColor: `rgba(0,0,0,${uiConfig.compBgOpacity ?? 0.6})` }}>
-            <div className="flex flex-col items-center justify-center w-full" style={{ transform: `scale(${sceneScale})` }}>
+            <div className="flex flex-col items-center justify-center w-[1920px] shrink-0" style={{ transform: `scale(${sceneScale})` }}>
               <div 
                 className="animate-in slide-in-from-bottom-10 fade-in duration-500 mb-6"
                 style={{ transform: `scale(${uiConfig.compImageScale ?? 1.0}) translate(${uiConfig.compImageX ?? 0}px, ${uiConfig.compImageY ?? 0}px)` }}
@@ -550,7 +550,7 @@ export function GameUI({ onKickParamsUpdate, onKickExecute, phase, setPhase, lev
         )}
         {phase === "LEVEL_FAILED" && (
           <div className="absolute inset-0 flex flex-col items-center justify-center backdrop-blur-md z-50 pointer-events-auto" style={{ backgroundColor: `rgba(0,0,0,${uiConfig.failBgOpacity ?? 0.8})` }}>
-            <div className="flex flex-col items-center justify-center w-full" style={{ transform: `scale(${sceneScale})` }}>
+            <div className="flex flex-col items-center justify-center w-[1920px] shrink-0" style={{ transform: `scale(${sceneScale})` }}>
               <div 
                 className="animate-in slide-in-from-top-10 fade-in duration-500 mb-2"
                 style={{ transform: `scale(${uiConfig.failImageScale ?? 1.0}) translate(${uiConfig.failImageX ?? 0}px, ${uiConfig.failImageY ?? 0}px)` }}
