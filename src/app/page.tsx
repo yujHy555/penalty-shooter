@@ -1393,20 +1393,25 @@ export default function Home() {
 		bgFolder.add((window as any).stadiumSettings, 'posZ', 10, 200).name('Pos Z').onChange(updateStadiumPlane);
 
 		// 2. Crowd Particles (SPS)
-		const sps = new SolidParticleSystem("crowdSPS", scene, { updatable: true });
+		const sps = new SolidParticleSystem("crowdSPS", scene, { updatable: true, enableMultiMaterial: true });
 		const crowdShape = MeshBuilder.CreatePlane("crowdParticle", { size: 1 }, scene);
 		sps.addShape(crowdShape, 3000); // Max 3000 particles
 		crowdShape.dispose();
 		
-		const crowdAtlasMat = new StandardMaterial("crowdAtlasMat", scene);
-		crowdAtlasMat.diffuseTexture = new Texture("/level_03_stadium/crowd_particles_01.png", scene, true, true);
-		crowdAtlasMat.diffuseTexture.hasAlpha = true;
-		crowdAtlasMat.useAlphaFromDiffuseTexture = true;
-		crowdAtlasMat.emissiveColor = new Color3(1, 1, 1);
-		crowdAtlasMat.disableLighting = true;
+		const multiMat = new MultiMaterial("crowdMultiMat", scene);
+		const colors = ["blue", "green", "red", "yellow"];
+		colors.forEach((c) => {
+			const m = new StandardMaterial("crowdMat_" + c, scene);
+			m.diffuseTexture = new Texture(`/crowd_particles/${c}.png`, scene);
+			m.diffuseTexture.hasAlpha = true;
+			m.useAlphaFromDiffuseTexture = true;
+			m.emissiveColor = new Color3(1, 1, 1);
+			m.disableLighting = true;
+			multiMat.subMaterials.push(m);
+		});
 
 		const spsMesh = sps.buildMesh();
-		spsMesh.material = crowdAtlasMat;
+		spsMesh.material = multiMat;
 		spsMesh.billboardMode = Mesh.BILLBOARDMODE_Y;
 
 		(window as any).lvl3CrowdSettings = {
@@ -1456,14 +1461,10 @@ export default function Home() {
 				particle.scaling.set(size * st.aspectRatio, size, size);
 
 				const variant = Math.floor(Math.random() * 4);
-				// Add a tiny inset to prevent texture bleeding from neighboring sprites (red artifacts)
-				const bleed = 0.02;
-				particle.uvs.x = variant * 0.25 + bleed;
-				particle.uvs.y = 0;
-				particle.uvs.z = (variant + 1) * 0.25 - bleed;
-				particle.uvs.w = 1;
+				particle.materialIndex = variant;
 			}
 			sps.setParticles();
+			sps.computeSubMeshes();
 		};
 
 		crowdSpsFolder.add((window as any).lvl3CrowdSettings, 'enabled').name('Enabled').onChange(() => {
@@ -1554,8 +1555,8 @@ export default function Home() {
 		flashFolder.add((window as any).lvl3FlashesSettings, 'enabled').name('Enabled');
 		flashFolder.add((window as any).lvl3FlashesSettings, 'ambientRate', 0, 100).name('Ambient Rate').onChange((v: number) => { if (!(window as any).isCrowdJumping) flashSys.emitRate = v; });
 		flashFolder.add((window as any).lvl3FlashesSettings, 'goalRate', 10, 500).name('Goal Rate').onChange((v: number) => { if ((window as any).isCrowdJumping) flashSys.emitRate = v; });
-		flashFolder.add((window as any).lvl3FlashesSettings, 'minSize', 0.1, 5).name('Min Size').onChange((v: number) => flashSys.minSize = v);
-		flashFolder.add((window as any).lvl3FlashesSettings, 'maxSize', 0.1, 5).name('Max Size').onChange((v: number) => flashSys.maxSize = v);
+		flashFolder.add((window as any).lvl3FlashesSettings, 'minSize', 0.1, 50).name('Min Size').onChange((v: number) => flashSys.minSize = v);
+		flashFolder.add((window as any).lvl3FlashesSettings, 'maxSize', 0.1, 50).name('Max Size').onChange((v: number) => flashSys.maxSize = v);
 		flashFolder.add((window as any).lvl3FlashesSettings, 'posX', -100, 100).name('Pos X').onChange((v: number) => { (flashSys.emitter as Vector3).x = v; });
 		flashFolder.add((window as any).lvl3FlashesSettings, 'posY', -50, 100).name('Pos Y').onChange((v: number) => { (flashSys.emitter as Vector3).y = v; });
 		flashFolder.add((window as any).lvl3FlashesSettings, 'posZ', 10, 200).name('Pos Z').onChange((v: number) => { (flashSys.emitter as Vector3).z = v; });
