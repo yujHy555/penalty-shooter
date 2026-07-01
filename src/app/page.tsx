@@ -2059,7 +2059,7 @@ export default function Home() {
 					}
 				});
 				
-				if (!stillJumping && crowdJumpTimer > 15) {
+				if (!stillJumping) {
 					(window as any).isCrowdJumping = false;
 					crowdMeshes.forEach((mesh, i) => {
 						const l = Math.floor(i / 10) + 1;
