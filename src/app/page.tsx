@@ -1851,7 +1851,11 @@ export default function Home() {
 		updateStones();
 
 		// --- Crowd Characters ---
-		const crowdSettings: any = {};
+		const crowdSettings: any = {
+			globalIdleEnabled: true,
+			globalIdleSpeed: 3.0,
+			globalIdleIntensity: 0.05
+		};
 		
 		for (let l = 1; l <= 3; l++) {
 			for (let s = 0; s < 10; s++) {
@@ -1900,8 +1904,10 @@ export default function Home() {
 								const size = t.getSize();
 								const aspect = (size.width && size.height) ? size.width / size.height : 1;
 								mesh.scaling.set(scale * aspect, scale, scale);
+								(mesh as any).baseAspect = aspect;
 							} else {
 								mesh.scaling.set(scale, scale, scale);
+								(mesh as any).baseAspect = 1;
 							}
 						};
 
@@ -1917,6 +1923,7 @@ export default function Home() {
 							(mat.diffuseTexture as Texture).onLoadObservable.addOnce(() => applyScale(mat.diffuseTexture as Texture));
 						} else {
 							mesh.scaling.set(scale, scale, scale);
+							(mesh as any).baseAspect = 1;
 						}
 					} else {
 						mesh.isVisible = false;
@@ -1956,7 +1963,11 @@ export default function Home() {
 		}
 
 		const crowdGuiFolder = gui.addFolder('Crowd Characters');
-
+		
+		const globalIdleFolder = crowdGuiFolder.addFolder('Global Idle Animation');
+		globalIdleFolder.add(crowdSettings, 'globalIdleEnabled').name('Idle Enabled');
+		globalIdleFolder.add(crowdSettings, 'globalIdleSpeed', 0.1, 20).name('Idle Speed');
+		globalIdleFolder.add(crowdSettings, 'globalIdleIntensity', 0.0, 0.5).name('Idle Intensity');
 		for (let l = 1; l <= 3; l++) {
 			const lvlFolder = crowdGuiFolder.addFolder(`Level ${l}`);
 			lvlFolder.close();
@@ -2005,8 +2016,12 @@ export default function Home() {
 				sps.setParticles();
 			}
 
+			const dt = scene.getEngine().getDeltaTime() * 0.001;
+			(window as any).crowdIdleTimer = ((window as any).crowdIdleTimer || 0) + dt;
+			const idleT = (window as any).crowdIdleTimer;
+
 			if ((window as any).isCrowdJumping) {
-				crowdJumpTimer += scene.getEngine().getDeltaTime() * 0.001;
+				crowdJumpTimer += dt;
 				(window as any).crowdJumpTimer = crowdJumpTimer;
 				
 				let stillJumping = false;
@@ -2025,6 +2040,11 @@ export default function Home() {
 						const speed = crowdSettings[`lvl${l}_${s}_jumpSpeed`] || 10;
 						const duration = crowdSettings[`lvl${l}_${s}_jumpDuration`] || 2.0;
 						const offset = (mesh as any).jumpOffset || 0;
+						const baseScale = crowdSettings[`lvl${l}_${s}_scale`] || 1.0;
+						const aspect = (mesh as any).baseAspect || 1.0;
+						
+						// Reset scaling to normal when jumping
+						mesh.scaling.set(baseScale * aspect, baseScale, baseScale);
 						
 						let localTime = (crowdJumpTimer * speed) - offset; 
 						if (localTime < 0) localTime = 0;
@@ -2047,6 +2067,32 @@ export default function Home() {
 						mesh.position.y = crowdSettings[`lvl${l}_${s}_y`] || 0;
 					});
 				}
+			} else {
+				// Apply Idle Animation
+				crowdMeshes.forEach((mesh, i) => {
+					if (mesh.isVisible) {
+						const l = Math.floor(i / 10) + 1;
+						const s = i % 10;
+						const baseScale = crowdSettings[`lvl${l}_${s}_scale`] || 1.0;
+						const aspect = (mesh as any).baseAspect || 1.0;
+						
+						let currentScaleY = baseScale;
+						let currentScaleX = baseScale * aspect;
+						let currentScaleZ = baseScale;
+
+						if (crowdSettings.globalIdleEnabled) {
+							const speed = crowdSettings.globalIdleSpeed || 3.0;
+							const intensity = crowdSettings.globalIdleIntensity || 0.05;
+							// Add a slight phase offset per character so they don't animate perfectly uniformly
+							const idlePhase = idleT * speed + i * 0.5;
+							const scaleOffset = Math.sin(idlePhase) * intensity;
+							currentScaleY += scaleOffset;
+							currentScaleX -= scaleOffset * 0.3; // Slight squash effect
+						}
+						
+						mesh.scaling.set(currentScaleX, currentScaleY, currentScaleZ);
+					}
+				});
 			}
 		});
 		// --- Cloud Layer ---
