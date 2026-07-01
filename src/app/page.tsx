@@ -130,6 +130,7 @@ export default function Home() {
 							if ((window as any).updateGrandstand) (window as any).updateGrandstand();
 							if ((window as any).updateStairs) (window as any).updateStairs();
 							if ((window as any).updateLvl3Stadium) (window as any).updateLvl3Stadium();
+							if ((window as any).updateImpact) (window as any).updateImpact();
 						}
 						return newLevel;
 					});
@@ -2835,7 +2836,7 @@ export default function Home() {
 		// -------------------------
 
 		const impactFolder = gui.addFolder('Goalkeeper Impact Effect');
-		(window as any).impactSettings = {
+		const defaultImpact = {
 			color1: "#ffcc33",
 			color2: "#ff661a",
 			minSize: 0.3,
@@ -2844,23 +2845,41 @@ export default function Home() {
 			minEmitPower: 10,
 			maxEmitPower: 47.134
 		};
+		(window as any).lvl1ImpactSettings = { ...defaultImpact };
+		(window as any).lvl2ImpactSettings = { ...defaultImpact };
+		(window as any).lvl3ImpactSettings = { ...defaultImpact };
+
 		const updateImpact = () => {
 			if ((window as any).impactSystem) {
 				const sys = (window as any).impactSystem;
-				sys.color1 = Color4.FromHexString((window as any).impactSettings.color1 + "FF");
-				sys.color2 = Color4.FromHexString((window as any).impactSettings.color2 + "FF");
-				sys.minSize = (window as any).impactSettings.minSize;
-				sys.maxSize = (window as any).impactSettings.maxSize;
-				sys.emitRate = (window as any).impactSettings.emitRate;
-				sys.minEmitPower = (window as any).impactSettings.minEmitPower;
-				sys.maxEmitPower = (window as any).impactSettings.maxEmitPower;
+				const level = (window as any).gameManager?.level || 1;
+				const st = level === 1 ? (window as any).lvl1ImpactSettings : 
+						   level === 2 ? (window as any).lvl2ImpactSettings : 
+						   (window as any).lvl3ImpactSettings;
+				sys.color1 = Color4.FromHexString(st.color1 + "FF");
+				sys.color2 = Color4.FromHexString(st.color2 + "FF");
+				sys.minSize = st.minSize;
+				sys.maxSize = st.maxSize;
+				sys.emitRate = st.emitRate;
+				sys.minEmitPower = st.minEmitPower;
+				sys.maxEmitPower = st.maxEmitPower;
 			}
 		};
-		impactFolder.addColor((window as any).impactSettings, 'color1').name('Core Color').onChange(updateImpact);
-		impactFolder.addColor((window as any).impactSettings, 'color2').name('Edge Color').onChange(updateImpact);
-		impactFolder.add((window as any).impactSettings, 'minSize', 0.1, 5.0).name('Min Size').onChange(updateImpact);
-		impactFolder.add((window as any).impactSettings, 'maxSize', 0.1, 5.0).name('Max Size').onChange(updateImpact);
-		impactFolder.add((window as any).impactSettings, 'emitRate', 100, 10000).name('Particle Count').onChange(updateImpact);
+		(window as any).updateImpact = updateImpact;
+
+		const setupImpactFolder = (folder: any, settings: any) => {
+			folder.addColor(settings, 'color1').name('Core Color').onChange(updateImpact);
+			folder.addColor(settings, 'color2').name('Edge Color').onChange(updateImpact);
+			folder.add(settings, 'minSize', 0.1, 5.0).name('Min Size').onChange(updateImpact);
+			folder.add(settings, 'maxSize', 0.1, 5.0).name('Max Size').onChange(updateImpact);
+			folder.add(settings, 'emitRate', 100, 10000).name('Particle Count').onChange(updateImpact);
+			folder.add(settings, 'minEmitPower', 1, 100).name('Min Burst Speed').onChange(updateImpact);
+			folder.add(settings, 'maxEmitPower', 1, 100).name('Max Burst Speed').onChange(updateImpact);
+		};
+
+		setupImpactFolder(impactFolder.addFolder('Level 1'), (window as any).lvl1ImpactSettings);
+		setupImpactFolder(impactFolder.addFolder('Level 2'), (window as any).lvl2ImpactSettings);
+		setupImpactFolder(impactFolder.addFolder('Level 3'), (window as any).lvl3ImpactSettings);
 
 		// --- Speedlines Effect Settings ---
 		const slFolder = gui.addFolder('Anime Speedlines Effect');
@@ -2878,8 +2897,7 @@ export default function Home() {
 		slFolder.add((window as any).slSettings, 'thickness', 0.5, 0.99).name('Line Thickness (inverse)');
 		slFolder.add((window as any).slSettings, 'minPower', 0.1, 1.0).name('Min Power Required');
 		slFolder.add((window as any).slSettings, 'intensityMult', 1.0, 10.0).name('Intensity Multiplier');
-		impactFolder.add((window as any).impactSettings, 'minEmitPower', 1, 100).name('Min Burst Speed').onChange(updateImpact);
-		impactFolder.add((window as any).impactSettings, 'maxEmitPower', 1, 100).name('Max Burst Speed').onChange(updateImpact);
+
 
 		const skyFolder = gui.addFolder('Environment');
 		(window as any).envSettings = { 
