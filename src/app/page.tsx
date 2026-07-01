@@ -1455,6 +1455,8 @@ export default function Home() {
 			m.useAlphaFromDiffuseTexture = true;
 			m.emissiveColor = new Color3(1, 1, 1);
 			m.disableLighting = true;
+			multiMat.subMaterials.push(m);
+		});
 		const spsMesh = sps.buildMesh();
 		spsMesh.material = multiMat;
 		spsMesh.billboardMode = Mesh.BILLBOARDMODE_Y;
