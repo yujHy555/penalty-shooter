@@ -1455,9 +1455,6 @@ export default function Home() {
 			m.useAlphaFromDiffuseTexture = true;
 			m.emissiveColor = new Color3(1, 1, 1);
 			m.disableLighting = true;
-			multiMat.subMaterials.push(m);
-		});
-
 		const spsMesh = sps.buildMesh();
 		spsMesh.material = multiMat;
 		spsMesh.billboardMode = Mesh.BILLBOARDMODE_Y;
@@ -1465,11 +1462,19 @@ export default function Home() {
 		(window as any).lvl3CrowdSettings = {
 			enabled: true,
 			count: 1500,
-			minSize: 3.5, maxSize: 5.5, // Increased size to compensate for aspect ratio
+			minSize: 3.5,
+			maxSize: 5.5, // Increased size to compensate for aspect ratio
 			aspectRatio: 0.25, // Default to 0.25 to make the 1:4 slices perfect circles
-			areaWidth: 200, areaHeight: 80,
-			baseY: 20, baseZ: 95,
-			jumpHeight: 2.0, jumpSpeed: 15, jumpDuration: 2.0
+			areaWidth: 200,
+			areaHeight: 80,
+			baseY: 20,
+			baseZ: 95,
+			jumpHeight: 2.0,
+			jumpSpeed: 15,
+			jumpDuration: 2.0,
+			idleEnabled: true,
+			idleSpeed: 3.0,
+			idleIntensity: 0.05
 		};
 
 		const crowdSpsFolder = lvl3StadiumFolder.addFolder('Crowd Particles');
@@ -1502,9 +1507,9 @@ export default function Home() {
 				// Z is now relative to the spsMesh!
 				particle.position.z = (Math.random() - 0.5) * 5; 
 
-				particle.props = { baseY: particle.position.y, jumpOffset: Math.random() * Math.PI * 2 };
-
 				const size = st.minSize + Math.random() * (st.maxSize - st.minSize);
+				particle.props = { baseY: particle.position.y, jumpOffset: Math.random() * Math.PI * 2, baseScale: size };
+
 				// Use the exposed aspectRatio to let the user dial in the perfect shape
 				particle.scaling.set(size * st.aspectRatio, size, size);
 
@@ -1530,9 +1535,26 @@ export default function Home() {
 		crowdSpsFolder.add((window as any).lvl3CrowdSettings, 'jumpSpeed', 1, 30).name('Jump Speed');
 		crowdSpsFolder.add((window as any).lvl3CrowdSettings, 'jumpDuration', 0.5, 5).name('Jump Duration');
 
+		const spsIdleFolder = crowdSpsFolder.addFolder('Idle Animation');
+		spsIdleFolder.add((window as any).lvl3CrowdSettings, 'idleEnabled').name('Idle Enabled');
+		spsIdleFolder.add((window as any).lvl3CrowdSettings, 'idleSpeed', 0.1, 20).name('Idle Speed');
+		spsIdleFolder.add((window as any).lvl3CrowdSettings, 'idleIntensity', 0.0, 0.5).name('Idle Intensity');
+
 		sps.updateParticle = (p) => {
 			const st = (window as any).lvl3CrowdSettings;
 			if (p.idx >= st.count) return p;
+			
+			const baseScale = p.props.baseScale || 1.0;
+			let currentScaleY = baseScale;
+			let currentScaleX = baseScale * st.aspectRatio;
+			let currentScaleZ = baseScale;
+
+			if (st.idleEnabled) {
+				const idlePhase = ((window as any).crowdIdleTimer || 0) * st.idleSpeed + p.idx * 0.5;
+				const scaleOffset = Math.sin(idlePhase) * st.idleIntensity;
+				currentScaleY += scaleOffset;
+				currentScaleX -= scaleOffset * 0.3; // Squash
+			}
 			
 			if ((window as any).isCrowdJumping) {
 				const timer = (window as any).crowdJumpTimer || 0;
@@ -1542,11 +1564,15 @@ export default function Home() {
 				if (timer < st.jumpDuration + (p.props.jumpOffset / st.jumpSpeed)) { 
 					const decay = Math.max(0, 1 - (timer / st.jumpDuration));
 					p.position.y = p.props.baseY + Math.abs(Math.sin(localTime)) * st.jumpHeight * decay;
+					// reset scale to original while jumping
+					p.scaling.set(baseScale * st.aspectRatio, baseScale, baseScale);
 				} else {
 					p.position.y = p.props.baseY;
+					p.scaling.set(currentScaleX, currentScaleY, currentScaleZ);
 				}
 			} else {
 				p.position.y = p.props.baseY;
+				p.scaling.set(currentScaleX, currentScaleY, currentScaleZ);
 			}
 			return p;
 		};
