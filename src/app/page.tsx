@@ -800,6 +800,7 @@ export default function Home() {
 					gm.setPhase("IDLE");
 					if ((window as any).updateLawn) (window as any).updateLawn();
 					if ((window as any).updateSignboard) (window as any).updateSignboard();
+					if ((window as any).resetTrail) (window as any).resetTrail();
 					if ((window as any).updateGkScale) (window as any).updateGkScale();
 					if ((window as any).updateCrowd) (window as any).updateCrowd();
 					if ((window as any).updateClouds) (window as any).updateClouds();
@@ -821,6 +822,7 @@ export default function Home() {
 					gm.setPhase("IDLE");
 					if ((window as any).updateLawn) (window as any).updateLawn();
 					if ((window as any).updateSignboard) (window as any).updateSignboard();
+					if ((window as any).resetTrail) (window as any).resetTrail();
 					if ((window as any).updateGkScale) (window as any).updateGkScale();
 					if ((window as any).updateCrowd) (window as any).updateCrowd();
 					if ((window as any).updateClouds) (window as any).updateClouds();
@@ -842,6 +844,7 @@ export default function Home() {
 					gm.setPhase("IDLE");
 					if ((window as any).updateLawn) (window as any).updateLawn();
 					if ((window as any).updateSignboard) (window as any).updateSignboard();
+					if ((window as any).resetTrail) (window as any).resetTrail();
 					if ((window as any).updateGkScale) (window as any).updateGkScale();
 					if ((window as any).updateCrowd) (window as any).updateCrowd();
 					if ((window as any).updateClouds) (window as any).updateClouds();
@@ -2826,20 +2829,51 @@ export default function Home() {
 		s3Folder.addColor((window as any).envSettings, 'lvl3Sky').name('Sky Color').onChange(updateSky);
 
 		// Ball Trail Effect
+		(window as any).trailSettings = {
+			lvl1Diameter: 0.04, lvl1Length: 60, lvl1Color: "#ffffff",
+			lvl2Diameter: 0.04, lvl2Length: 60, lvl2Color: "#ffffff",
+			lvl3Diameter: 0.04, lvl3Length: 60, lvl3Color: "#ffffff"
+		};
+
 		(window as any).resetTrail = () => {
 			if ((window as any).ballTrail) {
 				(window as any).ballTrail.dispose();
 			}
 
-			const trail = new TrailMesh("trail", ball, scene, 0.04, 60, true); // Thin, clean line
+			const level = (window as any).gameManager?.level || 1;
+			const st = (window as any).trailSettings;
+			let diameter = 0.04, length = 60, colorHex = "#ffffff";
+			if (st) {
+				if (level === 1) { diameter = st.lvl1Diameter; length = st.lvl1Length; colorHex = st.lvl1Color; }
+				else if (level === 2) { diameter = st.lvl2Diameter; length = st.lvl2Length; colorHex = st.lvl2Color; }
+				else { diameter = st.lvl3Diameter; length = st.lvl3Length; colorHex = st.lvl3Color; }
+			}
+
+			const trail = new TrailMesh("trail", ball, scene, diameter, length, true);
 			const trailMat = new StandardMaterial("trailMat", scene);
-			trailMat.emissiveColor = new Color3(1, 1, 1);
+			trailMat.emissiveColor = Color3.FromHexString(colorHex);
 			trailMat.disableLighting = true;
 			trailMat.alpha = 0; // Hidden by default until kicked
 			trail.material = trailMat;
 			(window as any).ballTrail = trail;
 		};
 		(window as any).resetTrail();
+
+		const trailGuiFolder = gui.addFolder('Ball Trail');
+		const trLvl1 = trailGuiFolder.addFolder('Level 1');
+		trLvl1.add((window as any).trailSettings, 'lvl1Diameter', 0.01, 0.5).step(0.01).name('Diameter').onChange((window as any).resetTrail);
+		trLvl1.add((window as any).trailSettings, 'lvl1Length', 10, 200).step(1).name('Length').onChange((window as any).resetTrail);
+		trLvl1.addColor((window as any).trailSettings, 'lvl1Color').name('Color').onChange((window as any).resetTrail);
+
+		const trLvl2 = trailGuiFolder.addFolder('Level 2');
+		trLvl2.add((window as any).trailSettings, 'lvl2Diameter', 0.01, 0.5).step(0.01).name('Diameter').onChange((window as any).resetTrail);
+		trLvl2.add((window as any).trailSettings, 'lvl2Length', 10, 200).step(1).name('Length').onChange((window as any).resetTrail);
+		trLvl2.addColor((window as any).trailSettings, 'lvl2Color').name('Color').onChange((window as any).resetTrail);
+
+		const trLvl3 = trailGuiFolder.addFolder('Level 3');
+		trLvl3.add((window as any).trailSettings, 'lvl3Diameter', 0.01, 0.5).step(0.01).name('Diameter').onChange((window as any).resetTrail);
+		trLvl3.add((window as any).trailSettings, 'lvl3Length', 10, 200).step(1).name('Length').onChange((window as any).resetTrail);
+		trLvl3.addColor((window as any).trailSettings, 'lvl3Color').name('Color').onChange((window as any).resetTrail);
 
 		// Direction Arrow
 		const arrowParent = new TransformNode("arrowParent", scene);
@@ -3174,8 +3208,7 @@ void main(void) {
 			if ((window as any).ballTrail) {
 				const trailMat = (window as any).ballTrail.material;
 				// Higher power = more opaque and intense trail
-				trailMat.alpha = Math.max(0.1, params.power); 
-				trailMat.emissiveColor = new Color3(1.0, 1.0 - (params.power * 0.5), 1.0 - params.power); // Turns slightly yellow/orange/red at max power
+				trailMat.alpha = Math.max(0.1, params.power);
 				(window as any).ballTrail.start(); // reset trail
 			}
 		}
@@ -3212,6 +3245,7 @@ void main(void) {
 						gameManagerRef.advanceLevel();
 						if ((window as any).updateLawn) (window as any).updateLawn();
 						if ((window as any).updateSignboard) (window as any).updateSignboard();
+						if ((window as any).resetTrail) (window as any).resetTrail();
 						if ((window as any).updateCrowd) (window as any).updateCrowd();
 						if ((window as any).updateSky) (window as any).updateSky();
 						if ((window as any).applyFieldLinesSettings) (window as any).applyFieldLinesSettings();
@@ -3225,6 +3259,7 @@ void main(void) {
 						gameManagerRef.retryLevel();
 						if ((window as any).updateLawn) (window as any).updateLawn();
 						if ((window as any).updateSignboard) (window as any).updateSignboard();
+						if ((window as any).resetTrail) (window as any).resetTrail();
 						if ((window as any).updateCrowd) (window as any).updateCrowd();
 						if ((window as any).updateSky) (window as any).updateSky();
 						if ((window as any).applyFieldLinesSettings) (window as any).applyFieldLinesSettings();
@@ -3238,6 +3273,7 @@ void main(void) {
 						gameManagerRef.resetGame();
 						if ((window as any).updateLawn) (window as any).updateLawn();
 						if ((window as any).updateSignboard) (window as any).updateSignboard();
+						if ((window as any).resetTrail) (window as any).resetTrail();
 						if ((window as any).updateCrowd) (window as any).updateCrowd();
 						if ((window as any).updateSky) (window as any).updateSky();
 						if ((window as any).applyFieldLinesSettings) (window as any).applyFieldLinesSettings();
