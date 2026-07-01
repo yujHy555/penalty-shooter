@@ -1550,11 +1550,12 @@ export default function Home() {
 			let currentScaleY = baseScale;
 			let currentScaleX = baseScale * st.aspectRatio;
 			let currentScaleZ = baseScale;
+			let scaleOffset = 0;
 
 			if (st.idleEnabled) {
 				const idlePhase = ((window as any).crowdIdleTimer || 0) * st.idleSpeed + p.idx * 0.5;
 				// Multiply by baseScale so the breathing is proportional to the particle's large size
-				const scaleOffset = Math.sin(idlePhase) * st.idleIntensity * baseScale;
+				scaleOffset = Math.sin(idlePhase) * st.idleIntensity * baseScale;
 				currentScaleY += scaleOffset;
 				currentScaleX -= scaleOffset * 0.3; // Squash
 			}
@@ -1570,11 +1571,11 @@ export default function Home() {
 					// reset scale to original while jumping
 					p.scaling.set(baseScale * st.aspectRatio, baseScale, baseScale);
 				} else {
-					p.position.y = p.props.baseY;
+					p.position.y = p.props.baseY + scaleOffset / 2;
 					p.scaling.set(currentScaleX, currentScaleY, currentScaleZ);
 				}
 			} else {
-				p.position.y = p.props.baseY;
+				p.position.y = p.props.baseY + scaleOffset / 2;
 				p.scaling.set(currentScaleX, currentScaleY, currentScaleZ);
 			}
 			return p;
