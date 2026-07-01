@@ -503,8 +503,8 @@ export default function Home() {
 		dirFolder.add((window as any).uiSettings, 'centerTop', 0, 500).step(1).name('Center Text Y Offset').listen();
 
 		const retroFolder = uiFolder.addFolder('Retro Gauges Config');
-		retroFolder.add((window as any).uiSettings, 'dirBottom', 0, 500).step(1).name('Global Y Position').listen();
-		retroFolder.add((window as any).uiSettings, 'gaugeX', -500, 500).step(1).name('Global X Position').listen();
+		retroFolder.add((window as any).uiSettings, 'dirBottom', -1000, 1000).step(1).name('Global Y Position').listen();
+		retroFolder.add((window as any).uiSettings, 'gaugeX', -1000, 1000).step(1).name('Global X Position').listen();
 		retroFolder.add((window as any).uiSettings, 'gaugeScale', 0.5, 3.0).step(0.1).name('Global Size').listen();
 
 		const dirArrowFolder = retroFolder.addFolder('Direction Arrow');
