@@ -1553,7 +1553,8 @@ export default function Home() {
 
 			if (st.idleEnabled) {
 				const idlePhase = ((window as any).crowdIdleTimer || 0) * st.idleSpeed + p.idx * 0.5;
-				const scaleOffset = Math.sin(idlePhase) * st.idleIntensity;
+				// Multiply by baseScale so the breathing is proportional to the particle's large size
+				const scaleOffset = Math.sin(idlePhase) * st.idleIntensity * baseScale;
 				currentScaleY += scaleOffset;
 				currentScaleX -= scaleOffset * 0.3; // Squash
 			}
