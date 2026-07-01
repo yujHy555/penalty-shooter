@@ -1288,9 +1288,9 @@ export default function Home() {
 		updateSignboardPhysics();
 		const sbGuiFolder = gui.addFolder('Signboard');
 		(window as any).signboardSettings = {
-			lvl1Width: 47.35, lvl1Height: 0.7755, lvl1PosZ: 12.5, lvl1PosY: 0, lvl1UScale: 10,
-			lvl2Width: 47.35, lvl2Height: 0.7755, lvl2PosZ: 12.5, lvl2PosY: 0, lvl2UScale: 10,
-			lvl3Width: 47.35, lvl3Height: 0.7755, lvl3PosZ: 12.5, lvl3PosY: 0, lvl3UScale: 10
+			lvl1Width: 47.35, lvl1Height: 0.7755, lvl1PosZ: 12.5, lvl1PosY: 0, lvl1UScale: 10, lvl1AnimEnabled: true, lvl1AnimSpeed: 0.5,
+			lvl2Width: 47.35, lvl2Height: 0.7755, lvl2PosZ: 12.5, lvl2PosY: 0, lvl2UScale: 10, lvl2AnimEnabled: true, lvl2AnimSpeed: 0.5,
+			lvl3Width: 47.35, lvl3Height: 0.7755, lvl3PosZ: 12.5, lvl3PosY: 0, lvl3UScale: 10, lvl3AnimEnabled: true, lvl3AnimSpeed: 0.5
 		};
 
 		const updateSignboard = () => {
@@ -1317,12 +1317,29 @@ export default function Home() {
 		(window as any).updateSignboard = updateSignboard;
 		updateSignboard(); // Initialize with correct texture and scales
 
+		scene.onBeforeRenderObservable.add(() => {
+			const level = (window as any).gameManager?.level || 1;
+			const st = (window as any).signboardSettings;
+			if (!st) return;
+			let enabled, speed;
+			if (level === 1) { enabled = st.lvl1AnimEnabled; speed = st.lvl1AnimSpeed; }
+			else if (level === 2) { enabled = st.lvl2AnimEnabled; speed = st.lvl2AnimSpeed; }
+			else { enabled = st.lvl3AnimEnabled; speed = st.lvl3AnimSpeed; }
+
+			if (enabled) {
+				const dt = scene.getEngine().getDeltaTime() / 1000.0;
+				signboardTex.uOffset += speed * dt;
+			}
+		});
+
 		const sbLvl1 = sbGuiFolder.addFolder('Level 1');
 		sbLvl1.add((window as any).signboardSettings, 'lvl1Width', 10, 100).name('Width').onChange(updateSignboard);
 		sbLvl1.add((window as any).signboardSettings, 'lvl1Height', 0.5, 10).name('Height').onChange(updateSignboard);
 		sbLvl1.add((window as any).signboardSettings, 'lvl1PosZ', 10, 30).name('Pos Z').onChange(updateSignboard);
 		sbLvl1.add((window as any).signboardSettings, 'lvl1PosY', -2, 10).name('Pos Y').onChange(updateSignboard);
 		sbLvl1.add((window as any).signboardSettings, 'lvl1UScale', 1, 20).step(1).name('uScale').onChange(updateSignboard);
+		sbLvl1.add((window as any).signboardSettings, 'lvl1AnimEnabled').name('Anim Enabled').onChange(updateSignboard);
+		sbLvl1.add((window as any).signboardSettings, 'lvl1AnimSpeed', -5, 5).step(0.1).name('Anim Speed').onChange(updateSignboard);
 
 		const sbLvl2 = sbGuiFolder.addFolder('Level 2');
 		sbLvl2.add((window as any).signboardSettings, 'lvl2Width', 10, 100).name('Width').onChange(updateSignboard);
@@ -1330,6 +1347,8 @@ export default function Home() {
 		sbLvl2.add((window as any).signboardSettings, 'lvl2PosZ', 10, 30).name('Pos Z').onChange(updateSignboard);
 		sbLvl2.add((window as any).signboardSettings, 'lvl2PosY', -2, 10).name('Pos Y').onChange(updateSignboard);
 		sbLvl2.add((window as any).signboardSettings, 'lvl2UScale', 1, 20).step(1).name('uScale').onChange(updateSignboard);
+		sbLvl2.add((window as any).signboardSettings, 'lvl2AnimEnabled').name('Anim Enabled').onChange(updateSignboard);
+		sbLvl2.add((window as any).signboardSettings, 'lvl2AnimSpeed', -5, 5).step(0.1).name('Anim Speed').onChange(updateSignboard);
 
 		const sbLvl3 = sbGuiFolder.addFolder('Level 3');
 		sbLvl3.add((window as any).signboardSettings, 'lvl3Width', 10, 100).name('Width').onChange(updateSignboard);
@@ -1337,6 +1356,8 @@ export default function Home() {
 		sbLvl3.add((window as any).signboardSettings, 'lvl3PosZ', 10, 30).name('Pos Z').onChange(updateSignboard);
 		sbLvl3.add((window as any).signboardSettings, 'lvl3PosY', -2, 10).name('Pos Y').onChange(updateSignboard);
 		sbLvl3.add((window as any).signboardSettings, 'lvl3UScale', 1, 20).step(1).name('uScale').onChange(updateSignboard);
+		sbLvl3.add((window as any).signboardSettings, 'lvl3AnimEnabled').name('Anim Enabled').onChange(updateSignboard);
+		sbLvl3.add((window as any).signboardSettings, 'lvl3AnimSpeed', -5, 5).step(0.1).name('Anim Speed').onChange(updateSignboard);
 
 		// --- Level 2 Grandstand ---
 		const grandstandMat = new StandardMaterial("grandstandMat", scene);
