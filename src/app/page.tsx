@@ -1882,13 +1882,13 @@ export default function Home() {
 		updateStones();
 
 		// --- Crowd Characters ---
-		const crowdSettings: any = {
-			globalIdleEnabled: true,
-			globalIdleSpeed: 3.0,
-			globalIdleIntensity: 0.05
-		};
+		const crowdSettings: any = {};
 		
 		for (let l = 1; l <= 3; l++) {
+			crowdSettings[`lvl${l}_idleEnabled`] = true;
+			crowdSettings[`lvl${l}_idleSpeed`] = 3.0;
+			crowdSettings[`lvl${l}_idleIntensity`] = 0.05;
+
 			for (let s = 0; s < 10; s++) {
 				crowdSettings[`lvl${l}_${s}_enabled`] = (l === 1 && (s === 0 || s === 1));
 				crowdSettings[`lvl${l}_${s}_tex`] = (l === 1 && s === 0) ? "/crowd_level_01/crowd_man_01.png" : 
@@ -1995,13 +1995,15 @@ export default function Home() {
 
 		const crowdGuiFolder = gui.addFolder('Crowd Characters');
 		
-		const globalIdleFolder = crowdGuiFolder.addFolder('Global Idle Animation');
-		globalIdleFolder.add(crowdSettings, 'globalIdleEnabled').name('Idle Enabled');
-		globalIdleFolder.add(crowdSettings, 'globalIdleSpeed', 0.1, 20).name('Idle Speed');
-		globalIdleFolder.add(crowdSettings, 'globalIdleIntensity', 0.0, 0.5).name('Idle Intensity');
 		for (let l = 1; l <= 3; l++) {
 			const lvlFolder = crowdGuiFolder.addFolder(`Level ${l}`);
 			lvlFolder.close();
+
+			const idleFolder = lvlFolder.addFolder('Idle Animation');
+			idleFolder.add(crowdSettings, `lvl${l}_idleEnabled`).name('Idle Enabled');
+			idleFolder.add(crowdSettings, `lvl${l}_idleSpeed`, 0.1, 20).name('Idle Speed');
+			idleFolder.add(crowdSettings, `lvl${l}_idleIntensity`, 0.0, 0.5).name('Idle Intensity');
+
 			for (let s = 0; s < 10; s++) {
 				const slotFolder = lvlFolder.addFolder(`Character ${s + 1}`);
 				slotFolder.close();
@@ -2111,9 +2113,9 @@ export default function Home() {
 						let currentScaleX = baseScale * aspect;
 						let currentScaleZ = baseScale;
 
-						if (crowdSettings.globalIdleEnabled) {
-							const speed = crowdSettings.globalIdleSpeed || 3.0;
-							const intensity = crowdSettings.globalIdleIntensity || 0.05;
+						if (crowdSettings[`lvl${l}_idleEnabled`]) {
+							const speed = crowdSettings[`lvl${l}_idleSpeed`] || 3.0;
+							const intensity = crowdSettings[`lvl${l}_idleIntensity`] || 0.05;
 							// Add a slight phase offset per character so they don't animate perfectly uniformly
 							const idlePhase = idleT * speed + i * 0.5;
 							const scaleOffset = Math.sin(idlePhase) * intensity;
