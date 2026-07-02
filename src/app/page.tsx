@@ -196,15 +196,6 @@ export default function Home() {
 
 		// Developer GUI
 		const gui = new GUI({ title: 'Game Debug & Tuning' });
-		if (process.env.NODE_ENV !== 'development') {
-			gui.hide();
-			if (gui.domElement) {
-				gui.domElement.style.display = 'none';
-				if (gui.domElement.parentElement) {
-					gui.domElement.parentElement.removeChild(gui.domElement);
-				}
-			}
-		}
 		(window as any).debugGUI = gui;
 
 		const cameraFolder = gui.addFolder('Camera');
